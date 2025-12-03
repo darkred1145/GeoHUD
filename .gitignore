@@ -1,41 +1,45 @@
-# Built application files
+# ===================================
+#      Build Generated Files
+# ===================================
+/build/
 *.apk
 *.aab
 *.ap_
-
-# Files for the ART/Dalvik VM
 *.dex
 
-# Java class files
-*.class
-
-# Generated files
-/build/
-/app/build/
-
-# Local configuration properties (sdk.dir, ndk.dir, etc.)
+# ===================================
+#        Local Properties
+# ===================================
+# Contains SDK and NDK paths, and other local settings.
 local.properties
+# Contains signing key passwords and other sensitive data.
+keystore.properties
+# Contains local Gradle settings (like the JDK path).
+gradle.properties
 
-# Log Files
-*.log
-
-# Android Studio IDE files
+# ===================================
+#   Android Studio & IDE Files
+# ===================================
+# IntelliJ / Android Studio
 .idea/
+*.iml
 .gradle/
 captures/
-*.iml
-/gradlew
-/gradlew.bat
 
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (safety from committing sender ID)
-google-services.json
-
-# C/C++ Misc
+# ===================================
+#         Miscellaneous
+# ===================================
+# Log files
+*.log
+# macOS-specific
+.DS_Store
+# C/C++ build outputs
 .cxx/
 *~
 *.o
 *.so
+# Keystore files (the files themselves, not the properties)
+*.jks
+*.keystore
+# Google Services (safety from committing sender ID)
+google-services.json
