@@ -1,0 +1,12 @@
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Tactical Palette -->
+    <color name="tactical_red">#D32F2F</color>
+    <color name="tactical_red_dim">#44D32F2F</color>
+    <color name="tactical_green">#00E676</color>
+    <color name="tactical_bg">#121212</color>
+    <color name="panel_bg">#CC1E1E1E</color>
+    <color name="border_color">#33FFFFFF</color>
+</resources>

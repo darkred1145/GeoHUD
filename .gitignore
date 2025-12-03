@@ -1,0 +1,41 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+/build/
+/app/build/
+
+# Local configuration properties (sdk.dir, ndk.dir, etc.)
+local.properties
+
+# Log Files
+*.log
+
+# Android Studio IDE files
+.idea/
+.gradle/
+captures/
+*.iml
+/gradlew
+/gradlew.bat
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (safety from committing sender ID)
+google-services.json
+
+# C/C++ Misc
+.cxx/
+*~
+*.o
+*.so

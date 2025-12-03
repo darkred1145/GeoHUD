@@ -1,0 +1,36 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Top Left Corner -->
+    <item android:top="0dp" android:left="0dp" android:width="40dp" android:height="40dp">
+        <shape>
+            <stroke android:width="3dp" android:color="@color/tactical_red" />
+        </shape>
+    </item>
+    <!-- Top Right Corner -->
+    <item android:top="0dp" android:right="0dp" android:width="40dp" android:height="40dp" android:gravity="right">
+        <shape>
+            <stroke android:width="3dp" android:color="@color/tactical_red" />
+        </shape>
+    </item>
+    <!-- Bottom Left Corner -->
+    <item android:bottom="0dp" android:left="0dp" android:width="40dp" android:height="40dp" android:gravity="bottom">
+        <shape>
+            <stroke android:width="3dp" android:color="@color/tactical_red" />
+        </shape>
+    </item>
+    <!-- Bottom Right Corner -->
+    <item android:bottom="0dp" android:right="0dp" android:width="40dp" android:height="40dp" android:gravity="bottom|right">
+        <shape>
+            <stroke android:width="3dp" android:color="@color/tactical_red" />
+        </shape>
+    </item>
+    <!-- Center Crosshair -->
+    <item android:width="20dp" android:height="20dp" android:gravity="center">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path android:fillColor="#88FFFFFF" android:pathData="M11,11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
+        </vector>
+    </item>
+</layer-list>
