@@ -1,4 +1,4 @@
-package com.darkred1145.terratag
+package com.darkred1145.geohud
 
 import android.view.LayoutInflater
 import android.view.View

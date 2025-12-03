@@ -1,4 +1,4 @@
-package com.darkred1145.terratag
+package com.darkred1145.geohud
 
 import android.app.Activity
 import android.content.Context
