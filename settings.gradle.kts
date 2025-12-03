@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TerraTag"
+rootProject.name = "GeoHUD"
 include(":app")
  
