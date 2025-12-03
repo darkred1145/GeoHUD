@@ -61,7 +61,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun savePathPreference(uri: Uri) {
-        val sharedPref = getSharedPreferences("TerraTagPrefs", MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("GeoHUDPrefs", MODE_PRIVATE)
         sharedPref.edit {
             putString("save_directory", uri.toString())
         }
@@ -69,14 +69,14 @@ class SettingsActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun loadPreferences() {
-        val sharedPref = getSharedPreferences("TerraTagPrefs", MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("GeoHUDPrefs", MODE_PRIVATE)
         val savedUriString = sharedPref.getString("save_directory", null)
 
         if (savedUriString != null) {
             val uri = savedUriString.toUri()
             updatePathUI(uri)
         } else {
-            txtCurrentPath.text = "/Pictures/TerraTag (Default)"
+            txtCurrentPath.text = "/Pictures/GeoHUD (Default)"
         }
     }
 

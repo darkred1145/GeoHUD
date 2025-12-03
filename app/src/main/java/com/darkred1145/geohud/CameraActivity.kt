@@ -125,7 +125,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
             } catch (exc: Exception) {
-                Log.e("TerraTag", "Camera binding failed", exc)
+                Log.e("GeoHUD", "Camera binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -231,7 +231,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             put(MediaStore.MediaColumns.DISPLAY_NAME, "TAG_$name")
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/TerraTag")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/GeoHUD")
             }
         }
 
@@ -246,7 +246,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
-                    Log.e("TerraTag", "Capture failed: ${exc.message}", exc)
+                    Log.e("GeoHUD", "Capture failed: ${exc.message}", exc)
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
@@ -274,10 +274,10 @@ class CameraActivity : AppCompatActivity(), LocationListener {
                     exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, location.altitude.toString())
                 }
                 exif.saveAttributes()
-                Log.d("TerraTag", "EXIF Data Injected")
+                Log.d("GeoHUD", "EXIF Data Injected")
             }
         } catch (e: Exception) {
-            Log.e("TerraTag", "EXIF Write Failed", e)
+            Log.e("GeoHUD", "EXIF Write Failed", e)
         }
     }
 

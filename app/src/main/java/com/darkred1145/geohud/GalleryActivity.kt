@@ -37,7 +37,7 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun loadImages() {
-        val sharedPref = getSharedPreferences("TerraTagPrefs", MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("GeoHUDPrefs", MODE_PRIVATE)
         val savedUriString = sharedPref.getString("save_directory", null)
 
         val imageList = mutableListOf<Any>()
@@ -58,9 +58,9 @@ class GalleryActivity : AppCompatActivity() {
             }
         } else {
             // 2. DEFAULT DIRECTORY (Internal Storage)
-            val mediaDir = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "TerraTag")
-            // Also check the standard Pictures/TerraTag folder if we saved there
-            val publicDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "TerraTag")
+            val mediaDir = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "GeoHUD")
+            // Also check the standard Pictures/GeoHUD folder if we saved there
+            val publicDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "GeoHUD")
 
             if (publicDir.exists()) {
                 publicDir.listFiles()?.filter { it.extension.equals("jpg", true) }

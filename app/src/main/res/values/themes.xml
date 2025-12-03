@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- === BASE TACTICAL THEME (RED/DEFAULT) === -->
-    <style name="Theme.TerraTag" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.GeoHUD" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Base Colors -->
         <item name="colorPrimary">#B71C1C</item>
         <item name="colorOnPrimary">#FFFFFF</item>
@@ -16,21 +16,21 @@
     </style>
 
     <!-- === OPTION A: NIGHT VISION (GREEN) === -->
-    <style name="Theme.TerraTag.NightVision" parent="Theme.TerraTag">
+    <style name="Theme.GeoHUD.NightVision" parent="Theme.GeoHUD">
         <item name="colorPrimary">#00E676</item> <!-- Bright Green -->
         <item name="colorOnPrimary">#000000</item>
         <item name="colorSecondary">#B71C1C</item> <!-- Red accents -->
     </style>
 
     <!-- === OPTION B: AZURE LINK (BLUE) === -->
-    <style name="Theme.TerraTag.Azure" parent="Theme.TerraTag">
+    <style name="Theme.GeoHUD.Azure" parent="Theme.GeoHUD">
         <item name="colorPrimary">#00B0FF</item> <!-- Electric Blue -->
         <item name="colorOnPrimary">#000000</item>
         <item name="colorSecondary">#FFD600</item> <!-- Yellow accents -->
     </style>
 
     <!-- === OPTION C: AMBER WARNING (ORANGE) === -->
-    <style name="Theme.TerraTag.Amber" parent="Theme.TerraTag">
+    <style name="Theme.GeoHUD.Amber" parent="Theme.GeoHUD">
         <item name="colorPrimary">#FFAB00</item> <!-- Industrial Orange -->
         <item name="colorOnPrimary">#000000</item>
         <item name="colorSecondary">#00E676</item> <!-- Green accents -->
@@ -41,6 +41,6 @@
         <item name="windowSplashScreenBackground">#000000</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
         <item name="windowSplashScreenAnimationDuration">500</item>
-        <item name="postSplashScreenTheme">@style/Theme.TerraTag</item>
+        <item name="postSplashScreenTheme">@style/Theme.GeoHUD</item>
     </style>
 </resources>

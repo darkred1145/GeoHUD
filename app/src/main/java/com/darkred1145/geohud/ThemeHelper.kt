@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.android.material.color.DynamicColors
 
 object ThemeHelper {
-    private const val PREF_NAME = "TerraTagPrefs"
+    private const val PREF_NAME = "GeoHUDPrefs"
     private const val KEY_THEME = "app_theme"
 
     // Theme Constants
@@ -23,17 +23,17 @@ object ThemeHelper {
             THEME_MATERIAL_YOU -> {
                 // [FIX] FIRST, set a valid base theme (Red default)
                 // This ensures we stop using the non-AppCompat "Splash Theme"
-                activity.setTheme(R.style.Theme_TerraTag)
+                activity.setTheme(R.style.Theme_GeoHUD)
 
                 // THEN, apply the Material You overlay on top of it
                 if (DynamicColors.isDynamicColorAvailable()) {
                     DynamicColors.applyToActivityIfAvailable(activity)
                 }
             }
-            THEME_NIGHT_VISION -> activity.setTheme(R.style.Theme_TerraTag_NightVision)
-            THEME_AZURE -> activity.setTheme(R.style.Theme_TerraTag_Azure)
-            THEME_AMBER -> activity.setTheme(R.style.Theme_TerraTag_Amber)
-            else -> activity.setTheme(R.style.Theme_TerraTag) // Default Red
+            THEME_NIGHT_VISION -> activity.setTheme(R.style.Theme_GeoHUD_NightVision)
+            THEME_AZURE -> activity.setTheme(R.style.Theme_GeoHUD_Azure)
+            THEME_AMBER -> activity.setTheme(R.style.Theme_GeoHUD_Amber)
+            else -> activity.setTheme(R.style.Theme_GeoHUD) // Default Red
         }
     }
 
