@@ -2,6 +2,7 @@ package com.darkred1145.geohud
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
@@ -12,9 +13,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.google.android.material.color.DynamicColors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -22,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnChangeDir: Button
     private lateinit var btnChangeTheme: Button
     private lateinit var btnCheckUpdate: Button
+    private lateinit var txtVersion: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(this) // Apply theme first!
@@ -32,6 +38,7 @@ class SettingsActivity : AppCompatActivity() {
         btnChangeDir = findViewById(R.id.btnChangeDir)
         btnChangeTheme = findViewById(R.id.btnChangeTheme)
         btnCheckUpdate = findViewById(R.id.btnCheckUpdate)
+        txtVersion = findViewById(R.id.txtVersion)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 
         // Set button text to current friendly name
@@ -39,6 +46,7 @@ class SettingsActivity : AppCompatActivity() {
         btnChangeTheme.text = ThemeHelper.getThemeName(currentCode)
 
         loadPreferences()
+        updateVersionInfo()
 
         btnBack.setOnClickListener { finish() }
 
@@ -56,7 +64,9 @@ class SettingsActivity : AppCompatActivity() {
         btnChangeDir.setOnClickListener { directoryLauncher.launch(null) }
         btnChangeTheme.setOnClickListener { showThemeSelector() }
         btnCheckUpdate.setOnClickListener {
-            Toast.makeText(this, "/// SCANNING FREQUENCIES... NO PACKETS FOUND ///", Toast.LENGTH_SHORT).show()
+            CoroutineScope(Dispatchers.Main).launch {
+                UpdateChecker.checkForUpdates(this@SettingsActivity)
+            }
         }
     }
 
@@ -85,6 +95,18 @@ class SettingsActivity : AppCompatActivity() {
         val documentFile = DocumentFile.fromTreeUri(this, uri)
         val name = documentFile?.name ?: uri.path
         txtCurrentPath.text = "EXTERNAL: $name"
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateVersionInfo() {
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val versionName = packageInfo.versionName
+            val longVersionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
+            txtVersion.text = "VERSION: $versionName\nBUILD: $longVersionCode\nDEV: DARKRED1145"
+        } catch (e: PackageManager.NameNotFoundException) {
+            txtVersion.text = "VERSION: UNKNOWN"
+        }
     }
 
     private fun showThemeSelector() {
