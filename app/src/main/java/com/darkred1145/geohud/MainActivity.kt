@@ -2,10 +2,10 @@ package com.darkred1145.geohud
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : AppCompatActivity() {
@@ -18,32 +18,32 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Bind Buttons
-        val btnCamera = findViewById<Button>(R.id.btnLaunchCamera)
-        val btnGallery = findViewById<Button>(R.id.btnGallery)
+        val cameraCard = findViewById<ConstraintLayout>(R.id.cameraCard)
+        val galleryCard = findViewById<ConstraintLayout>(R.id.galleryCard)
+        val instructionsCard = findViewById<ConstraintLayout>(R.id.instructionsCard)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
-        val btnInstructions = findViewById<Button>(R.id.btnInstructions)
 
         // Launch Camera Mode
-        btnCamera.setOnClickListener {
+        cameraCard.setOnClickListener {
             val intent = Intent(this, CameraActivity::class.java)
             startActivity(intent)
         }
 
         // Launch Custom Gallery (Updated)
-        btnGallery.setOnClickListener {
+        galleryCard.setOnClickListener {
             val intent = Intent(this, GalleryActivity::class.java)
             startActivity(intent)
+        }
+
+        // Show Instructions
+        instructionsCard.setOnClickListener {
+            showInstructionsDialog()
         }
 
         // Launch Settings
         btnSettings.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
-        }
-
-        // Show Instructions
-        btnInstructions.setOnClickListener {
-            showInstructionsDialog()
         }
     }
 

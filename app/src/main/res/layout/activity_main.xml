@@ -21,24 +21,24 @@
             android:id="@+id/appTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GEOHUD"
             android:fontFamily="monospace"
-            android:textSize="24sp"
             android:letterSpacing="0.1"
-            android:textStyle="bold"
+            android:text="GEOHUD"
             android:textColor="?attr/colorPrimary"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TACTICAL GEO-LOGGER"
-            android:fontFamily="sans-serif-condensed"
-            android:textSize="12sp"
-            android:textColor="?attr/colorPrimary"
             android:alpha="0.8"
+            android:fontFamily="sans-serif-condensed"
             android:letterSpacing="0.2"
+            android:text="TACTICAL GEO-LOGGER"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/appTitle" />
 
@@ -47,11 +47,12 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Settings"
             android:src="@drawable/ic_settings"
-            app:tint="?attr/colorOnSecondary"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:tint="?attr/colorOnSecondary" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -60,8 +61,8 @@
         android:id="@+id/statusStrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginTop="12dp"
+        android:orientation="horizontal"
         android:padding="8dp"
         app:layout_constraintTop_toBottomOf="@id/headerPanel">
 
@@ -69,17 +70,17 @@
         <View
             android:layout_width="8dp"
             android:layout_height="8dp"
-            android:background="?attr/colorSecondary"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:background="?attr/colorSecondary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SYSTEM READY // GPS STANDBY"
             android:fontFamily="monospace"
+            android:text="SYSTEM READY // GPS STANDBY"
             android:textColor="?attr/colorSecondary"
-            android:textSize="12sp"/>
+            android:textSize="12sp" />
     </LinearLayout>
 
     <!-- Main Action: Camera -->
@@ -93,42 +94,38 @@
         android:backgroundTint="?attr/colorPrimary"
         android:backgroundTintMode="multiply"
         android:clickable="true"
+        android:contentDescription="Engage Camera"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/statusStrip"
         app:layout_constraintBottom_toTopOf="@id/galleryCard"
+        app:layout_constraintTop_toBottomOf="@id/statusStrip"
         app:layout_constraintVertical_weight="1.5">
 
         <ImageView
             android:id="@+id/iconCam"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:contentDescription="Camera Icon"
             android:src="@drawable/ic_camera_lens"
-            app:tint="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.4" />
+            app:layout_constraintVertical_bias="0.4"
+            app:tint="@android:color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ENGAGE CAMERA"
+            android:layout_marginTop="16dp"
             android:fontFamily="monospace"
+            android:letterSpacing="0.1"
+            android:text="ENGAGE CAMERA"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:letterSpacing="0.1"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/iconCam"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <Button
-            android:id="@+id/btnLaunchCamera"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"/>
+            app:layout_constraintTop_toBottomOf="@id/iconCam" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -139,46 +136,34 @@
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="4dp"
-        android.layout_marginBottom="24dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/bg_tactical_panel"
-        app:layout_constraintTop_toBottomOf="@id/cameraCard"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/instructionsCard"
+        android:clickable="true"
+        android:contentDescription="View Logs"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/instructionsCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cameraCard"
         app:layout_constraintVertical_weight="1">
 
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
+            android:drawableStart="@drawable/ic_gallery_grid"
+            android:drawablePadding="16dp"
+            android:drawableTint="#AAAAAA"
+            android:fontFamily="monospace"
+            android:gravity="center_vertical"
+            android:text="VIEW LOGS"
+            android:textColor="#AAAAAA"
+            android:textSize="16sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_gallery_grid"
-                app:tint="#AAAAAA"
-                android:layout_marginEnd="16dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="VIEW LOGS"
-                android:fontFamily="monospace"
-                android:textColor="#AAAAAA"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btnGallery"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="UseAppTint" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -189,42 +174,30 @@
         android:layout_height="0dp"
         android:layout_marginStart="4dp"
         android:background="@drawable/bg_tactical_panel"
-        app:layout_constraintTop_toTopOf="@+id/galleryCard"
+        android:clickable="true"
+        android:contentDescription="How-To"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="@+id/galleryCard"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/galleryCard"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="@+id/galleryCard">
 
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
+            android:drawableTop="@android:drawable/ic_menu_help"
+            android:drawablePadding="8dp"
+            android:drawableTint="#AAAAAA"
+            android:fontFamily="monospace"
+            android:gravity="center_horizontal"
+            android:text="HOW-TO"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@android:drawable/ic_menu_help"
-                app:tint="#AAAAAA"
-                android:layout_marginBottom="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="HOW-TO"
-                android:fontFamily="monospace"
-                android:textColor="#AAAAAA"
-                android:textSize="12sp"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btnInstructions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="UseAppTint" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
