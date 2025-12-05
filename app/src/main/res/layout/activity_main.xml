@@ -83,7 +83,6 @@
     </LinearLayout>
 
     <!-- Main Action: Camera -->
-    <!-- We tint the background to match the primary theme color -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cameraCard"
         android:layout_width="match_parent"
@@ -136,12 +135,15 @@
     <!-- Secondary Action: Gallery -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/galleryCard"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="4dp"
+        android.layout_marginBottom="24dp"
         android:background="@drawable/bg_tactical_panel"
         app:layout_constraintTop_toBottomOf="@id/cameraCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/instructionsCard"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_weight="1">
 
@@ -174,6 +176,52 @@
 
         <Button
             android:id="@+id/btnGallery"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Tertiary Action: Instructions -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/instructionsCard"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/bg_tactical_panel"
+        app:layout_constraintTop_toTopOf="@+id/galleryCard"
+        app:layout_constraintBottom_toBottomOf="@+id/galleryCard"
+        app:layout_constraintStart_toEndOf="@+id/galleryCard"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/ic_menu_help"
+                app:tint="#AAAAAA"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HOW-TO"
+                android:fontFamily="monospace"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnInstructions"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"/>
