@@ -1,56 +1,62 @@
 <resources>
     <style name="Theme.GeoHUD" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">#B71C1C</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorPrimaryContainer">#4F0000</item>
-        <item name="colorOnPrimaryContainer">#FFDAD6</item>
+        <item name="colorPrimary">#39C5BB</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorPrimaryContainer">#004D46</item>
+        <item name="colorOnPrimaryContainer">#B2DFDB</item>
 
-        <item name="colorSecondary">#00E676</item>
+        <item name="colorSecondary">#E91E63</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <item name="android:statusBarColor">#051413</item>
+        <item name="android:windowBackground">#051413</item>
+        <item name="android:navigationBarColor">#051413</item>
+
+        <item name="colorSurface">#0A2120</item>
+        <item name="colorOnSurface">#E0F2F1</item>
+    </style>
+
+    <style name="Theme.GeoHUD.Rem" parent="Theme.GeoHUD">
+        <item name="colorPrimary">#5D9CEC</item>
+        <item name="colorOnPrimary">#000000</item>
+
+        <item name="colorSecondary">#F48FB1</item>
         <item name="colorOnSecondary">#000000</item>
 
-        <item name="android:statusBarColor">#000000</item>
-        <item name="android:windowBackground">#000000</item>
-        <item name="android:navigationBarColor">#000000</item>
-
-        <item name="colorSurface">#121212</item>
-        <item name="colorOnSurface">#E0E0E0</item>
+        <item name="android:windowBackground">#0B101A</item>
+        <item name="colorSurface">#131A29</item>
+        <item name="android:statusBarColor">#0B101A</item>
+        <item name="android:navigationBarColor">#0B101A</item>
     </style>
 
-    <style name="Theme.GeoHUD.NightVision" parent="Theme.GeoHUD">
-        <item name="colorPrimary">#00E676</item>
+    <style name="Theme.GeoHUD.Luka" parent="Theme.GeoHUD">
+        <item name="colorPrimary">#FF80AB</item>
         <item name="colorOnPrimary">#000000</item>
-        <item name="colorSecondary">#B71C1C</item>
 
-        <item name="android:windowBackground">#000F05</item>
-        <item name="colorSurface">#001C08</item>
-        <item name="android:statusBarColor">#000F05</item>
-        <item name="android:navigationBarColor">#000F05</item>
+        <item name="colorSecondary">#FFD700</item>
+        <item name="colorOnSecondary">#000000</item>
+
+        <item name="android:windowBackground">#1A0B10</item>
+        <item name="colorSurface">#2B121A</item>
+        <item name="android:statusBarColor">#1A0B10</item>
+        <item name="android:navigationBarColor">#1A0B10</item>
     </style>
 
-    <style name="Theme.GeoHUD.Azure" parent="Theme.GeoHUD">
-        <item name="colorPrimary">#00B0FF</item>
+    <style name="Theme.GeoHUD.Rin" parent="Theme.GeoHUD">
+        <item name="colorPrimary">#FFD600</item>
         <item name="colorOnPrimary">#000000</item>
-        <item name="colorSecondary">#FFD600</item>
 
-        <item name="android:windowBackground">#000510</item>
-        <item name="colorSurface">#000D21</item>
-        <item name="android:statusBarColor">#000510</item>
-        <item name="android:navigationBarColor">#000510</item>
-    </style>
+        <item name="colorSecondary">#FFFFFF</item>
+        <item name="colorOnSecondary">#000000</item>
 
-    <style name="Theme.GeoHUD.Amber" parent="Theme.GeoHUD">
-        <item name="colorPrimary">#FFAB00</item>
-        <item name="colorOnPrimary">#000000</item>
-        <item name="colorSecondary">#00E676</item>
-
-        <item name="android:windowBackground">#140A00</item>
-        <item name="colorSurface">#211200</item>
-        <item name="android:statusBarColor">#140A00</item>
-        <item name="android:navigationBarColor">#140A00</item>
+        <item name="android:windowBackground">#141400</item>
+        <item name="colorSurface">#262600</item>
+        <item name="android:statusBarColor">#141400</item>
+        <item name="android:navigationBarColor">#141400</item>
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#000000</item>
+        <item name="windowSplashScreenBackground">#051413</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
         <item name="postSplashScreenTheme">@style/Theme.GeoHUD</item>
     </style>
