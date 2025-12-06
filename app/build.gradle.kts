@@ -4,12 +4,12 @@ import java.io.FileInputStream
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
 }
 
 android {
     namespace = "com.darkred1145.geohud"
-    compileSdk = 35
+    compileSdk = 36
 
     // Read keystore properties for release signing
     val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -33,8 +33,8 @@ android {
         applicationId = "com.darkred1145.geohud"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.4.0-alpha"
+        versionCode = 5
+        versionName = "0.5.0-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -75,19 +75,19 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    val cameraxVersion = "1.5.1"
+    val cameraxVersion = "1.5.2"
     implementation("androidx.camera:camera-core:${cameraxVersion}")
     implementation("androidx.camera:camera-camera2:${cameraxVersion}")
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
     implementation("androidx.camera:camera-extensions:${cameraxVersion}")
-    implementation("androidx.exifinterface:exifinterface:1.4.1")
+    implementation("androidx.exifinterface:exifinterface:1.4.2")
     implementation("io.coil-kt:coil:2.7.0")
 
     implementation("androidx.core:core-splashscreen:1.2.0")
 
     // Network & Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
 }
