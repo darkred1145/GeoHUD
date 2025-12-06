@@ -10,13 +10,13 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.google.android.material.color.DynamicColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,10 +30,13 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var txtVersion: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeHelper.applyTheme(this) // Apply theme first!
+        // [IMPORTANT] Apply Theme BEFORE calling super.onCreate or setContentView
+        ThemeHelper.applyTheme(this)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        // Bind Views
         txtCurrentPath = findViewById(R.id.txtCurrentPath)
         btnChangeDir = findViewById(R.id.btnChangeDir)
         btnChangeTheme = findViewById(R.id.btnChangeTheme)
@@ -41,16 +44,17 @@ class SettingsActivity : AppCompatActivity() {
         txtVersion = findViewById(R.id.txtVersion)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 
-        // Set button text to current friendly name
+        // Initialize UI with current data
         val currentCode = ThemeHelper.getCurrentTheme(this)
         btnChangeTheme.text = ThemeHelper.getThemeName(currentCode)
 
         loadPreferences()
         updateVersionInfo()
 
+        // Listeners
         btnBack.setOnClickListener { finish() }
 
-        // Directory Logic
+        // Directory Picker Logic
         val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
             if (uri != null) {
                 val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
@@ -104,7 +108,7 @@ class SettingsActivity : AppCompatActivity() {
             val versionName = packageInfo.versionName
             val longVersionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
             txtVersion.text = "VERSION: $versionName\nBUILD: $longVersionCode\nDEV: DARKRED1145"
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             txtVersion.text = "VERSION: UNKNOWN"
         }
     }
@@ -112,44 +116,65 @@ class SettingsActivity : AppCompatActivity() {
     private fun showThemeSelector() {
         val isDynamicSupported = DynamicColors.isDynamicColorAvailable()
 
-        // Define the list of friendly names
-        val themeOptions = mutableListOf(
+        // 1. Create parallel lists for Display Names and Internal Codes
+        val themeNames = mutableListOf(
             "Tactical (Red)",
             "Night Vision (Green)",
             "Azure Link (Blue)",
             "Amber Warning (Orange)"
         )
+        val themeCodes = mutableListOf(
+            ThemeHelper.THEME_TACTICAL_RED,
+            ThemeHelper.THEME_NIGHT_VISION,
+            ThemeHelper.THEME_AZURE,
+            ThemeHelper.THEME_AMBER
+        )
 
-        // Only add Material You if the phone supports it
+        // 2. Conditionally add Material You
         if (isDynamicSupported) {
-            themeOptions.add("System (Material You)")
+            themeNames.add("System (Material You)")
+            themeCodes.add(ThemeHelper.THEME_MATERIAL_YOU)
         }
 
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("SELECT INTERFACE SKIN")
+        // 3. Find currently selected index
+        val currentCode = ThemeHelper.getCurrentTheme(this)
+        val checkedItem = themeCodes.indexOf(currentCode).coerceAtLeast(0)
 
-        builder.setItems(themeOptions.toTypedArray()) { _, which ->
-            val selectedName = themeOptions[which]
+        // 4. Build the Dialog
+        // We use MaterialAlertDialogBuilder so it inherits our dark theme colors
+        MaterialAlertDialogBuilder(this)
+            .setTitle("SELECT INTERFACE SKIN")
+            .setSingleChoiceItems(themeNames.toTypedArray(), checkedItem) { dialog, which ->
+                // User clicked an option
+                val selectedCode = themeCodes[which]
 
-            // Map the selected name back to our internal constants
-            val selectedCode = when {
-                selectedName.contains("Red") -> ThemeHelper.THEME_TACTICAL_RED
-                selectedName.contains("Green") -> ThemeHelper.THEME_NIGHT_VISION
-                selectedName.contains("Blue") -> ThemeHelper.THEME_AZURE
-                selectedName.contains("Orange") -> ThemeHelper.THEME_AMBER
-                selectedName.contains("System") -> ThemeHelper.THEME_MATERIAL_YOU
-                else -> ThemeHelper.THEME_TACTICAL_RED
+                // Save immediately
+                ThemeHelper.saveThemePreference(this, selectedCode)
+
+                // Close dialog
+                dialog.dismiss()
+
+                // Trigger Restart
+                restartApp()
             }
+            .setNegativeButton("CANCEL", null)
+            .show()
+    }
 
-            ThemeHelper.saveThemePreference(this, selectedCode)
-            Toast.makeText(this, "REBOOTING INTERFACE...", Toast.LENGTH_SHORT).show()
+    private fun restartApp() {
+        Toast.makeText(this, "REBOOTING INTERFACE...", Toast.LENGTH_SHORT).show()
 
-            // Restart App
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(intent)
-            finish()
-        }
-        builder.show()
+        // Create a fresh intent to restart the app from MainActivity
+        // This ensures the back stack is cleared and all activities redraw with the new colors
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+
+        // Kill the current settings screen strictly to be safe
+        finish()
+
+        // Optional: Fade out animation to make it look like a system reboot
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 }
