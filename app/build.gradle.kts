@@ -1,10 +1,11 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -56,11 +57,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
+    // REMOVED: kotlinOptions { jvmTarget = "11" }
+    // This is now handled by the 'kotlin' block below.
+
     buildFeatures {
         buildConfig = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -84,6 +92,7 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.4.2")
     implementation("io.coil-kt:coil:2.7.0")
 
+    implementation("androidx.documentfile:documentfile:1.1.0")
     implementation("androidx.core:core-splashscreen:1.2.0")
 
     // Network & Serialization

@@ -5,11 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
@@ -17,6 +16,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.GET
 import kotlin.math.max
 
@@ -135,12 +135,12 @@ object UpdateChecker {
                 } else {
                     // Fallback: No APK in assets, just open GitHub page
                     Toast.makeText(context, "APK not found directly. Opening GitHub...", Toast.LENGTH_LONG).show()
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(release.htmlUrl))
+                    val intent = Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri())
                     context.startActivity(intent)
                 }
             }
             .setNeutralButton("GitHub") { _, _ ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(release.htmlUrl))
+                val intent = Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri())
                 context.startActivity(intent)
             }
             .setNegativeButton("Later", null)
@@ -149,7 +149,7 @@ object UpdateChecker {
 
     private fun downloadAndInstallApk(context: Context, url: String, version: String) {
         try {
-            val request = DownloadManager.Request(Uri.parse(url))
+            val request = DownloadManager.Request(url.toUri())
                 .setTitle("Downloading GeoHUD Update")
                 .setDescription("Version $version")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
