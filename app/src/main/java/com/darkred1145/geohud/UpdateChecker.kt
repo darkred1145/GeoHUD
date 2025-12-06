@@ -1,13 +1,17 @@
 package com.darkred1145.geohud
 
 import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,7 +31,7 @@ object UpdateChecker {
     private const val REPO_OWNER = "darkred1145"
     private const val REPO_NAME = "GeoHUD"
 
-    // --- DATA MODELS ---
+    // --- MODELS ---
     @Serializable
     data class GitHubAsset(
         @SerialName("browser_download_url") val browserDownloadUrl: String,
@@ -41,7 +45,7 @@ object UpdateChecker {
         val assets: List<GitHubAsset> = emptyList()
     )
 
-    // --- API SERVICE ---
+    // --- API ---
     interface GitHubApiService {
         @GET("repos/{owner}/{repo}/releases/latest")
         suspend fun getLatestRelease(
@@ -50,22 +54,18 @@ object UpdateChecker {
         ): GitHubRelease
     }
 
-    // --- RETROFIT INSTANCE ---
     private val json = Json { ignoreUnknownKeys = true }
-
     private val retrofit = Retrofit.Builder()
         .baseUrl(GITHUB_API_URL)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
-
     private val service: GitHubApiService = retrofit.create(GitHubApiService::class.java)
 
-    // --- MAIN LOGIC ---
+    // --- LOGIC ---
     suspend fun checkForUpdates(context: Context) {
-        // 0. Check for internet before proceeding
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        if (networkCapabilities == null || !networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val nc = cm.getNetworkCapabilities(cm.activeNetwork)
+        if (nc == null || !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
             }
@@ -73,98 +73,123 @@ object UpdateChecker {
         }
 
         try {
-            // 1. Fetch Release Info (Background Thread)
             val latestRelease = withContext(Dispatchers.IO) {
                 service.getLatestRelease(REPO_OWNER, REPO_NAME)
             }
 
-            // 2. Clean Version Strings (Remove 'v' and whitespace)
-            val remoteVersionStr = latestRelease.tagName.replace("v", "", ignoreCase = true).trim()
-            val localVersionStr = BuildConfig.VERSION_NAME.replace("v", "", ignoreCase = true).trim()
+            val remoteVer = latestRelease.tagName.replace("v", "", ignoreCase = true).trim()
+            val localVer = BuildConfig.VERSION_NAME.replace("v", "", ignoreCase = true).trim()
 
-            // 3. Compare and Show Dialog (Switch to Main Thread for UI)
-            if (isRemoteNewer(remoteVersionStr, localVersionStr)) {
+            if (isRemoteNewer(remoteVer, localVer)) {
                 withContext(Dispatchers.Main) {
-                    showUpdateDialog(context, latestRelease, localVersionStr)
+                    showUpdateDialog(context, latestRelease, localVer)
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "GeoHUD is up to date!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "System is up to date.", Toast.LENGTH_SHORT).show()
                 }
             }
-
         } catch (e: Exception) {
-            e.printStackTrace()
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Update check failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Update check failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    /**
-     * Compares two version strings (e.g. "1.2.0" vs "1.1.5").
-     * Returns true ONLY if remote is strictly greater than local.
-     */
     private fun isRemoteNewer(remote: String, local: String): Boolean {
-        val remoteParts = remote.split(".").map { it.toIntOrNull() ?: 0 }
-        val localParts = local.split(".").map { it.toIntOrNull() ?: 0 }
-        val length = max(remoteParts.size, localParts.size)
-
+        val rParts = remote.split(".").map { it.toIntOrNull() ?: 0 }
+        val lParts = local.split(".").map { it.toIntOrNull() ?: 0 }
+        val length = max(rParts.size, lParts.size)
         for (i in 0 until length) {
-            val r = remoteParts.getOrElse(i) { 0 }
-            val l = localParts.getOrElse(i) { 0 }
-
+            val r = rParts.getOrElse(i) { 0 }
+            val l = lParts.getOrElse(i) { 0 }
             if (r > l) return true
             if (r < l) return false
         }
         return false
     }
 
-    private fun showUpdateDialog(context: Context, release: GitHubRelease, localVersion: String) {
+    private fun showUpdateDialog(context: Context, release: GitHubRelease, localVer: String) {
         AlertDialog.Builder(context)
-            .setTitle("Update Available")
-            .setMessage("New version: ${release.tagName}\nCurrent version: $localVersion")
-            .setPositiveButton("Download & Install") { _, _ ->
-                // Try to find the APK asset
-                val apkAsset = release.assets.find {
-                    it.name.endsWith(".apk", ignoreCase = true)
-                }
-
+            .setTitle("New Intel Available")
+            .setMessage("Version ${release.tagName} detected.\nCurrent: $localVer")
+            .setPositiveButton("Initialize Update") { _, _ ->
+                val apkAsset = release.assets.find { it.name.endsWith(".apk", true) }
                 if (apkAsset != null) {
-                    downloadAndInstallApk(context, apkAsset.browserDownloadUrl, release.tagName)
+                    downloadAndInstall(context, apkAsset.browserDownloadUrl, release.tagName)
                 } else {
-                    // Fallback: No APK in assets, just open GitHub page
-                    Toast.makeText(context, "APK not found directly. Opening GitHub...", Toast.LENGTH_LONG).show()
                     val intent = Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri())
                     context.startActivity(intent)
                 }
             }
-            .setNeutralButton("GitHub") { _, _ ->
-                val intent = Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri())
-                context.startActivity(intent)
-            }
-            .setNegativeButton("Later", null)
+            .setNegativeButton("Abort", null)
             .show()
     }
 
-    private fun downloadAndInstallApk(context: Context, url: String, version: String) {
+    private fun downloadAndInstall(context: Context, url: String, version: String) {
         try {
+            val fileName = "GeoHUD-$version.apk"
             val request = DownloadManager.Request(url.toUri())
                 .setTitle("Downloading GeoHUD Update")
                 .setDescription("Version $version")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "GeoHUD-$version.apk")
-                .setAllowedOverMetered(true)
-                .setAllowedOverRoaming(true)
-                // IMPORTANT: This line makes the notification clickable for installation
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                 .setMimeType("application/vnd.android.package-archive")
 
-            val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            downloadManager.enqueue(request)
+            val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val downloadId = dm.enqueue(request)
 
-            Toast.makeText(context, "Downloading... Tap the notification when complete to install.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Download initiated...", Toast.LENGTH_SHORT).show()
+
+            // REGISTER RECEIVER FOR AUTO-INSTALL
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(ctxt: Context, intent: Intent) {
+                    val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                    if (id == downloadId) {
+                        try { ctxt.unregisterReceiver(this) } catch (_: Exception) {}
+
+                        val query = DownloadManager.Query().setFilterById(downloadId)
+                        val cursor = dm.query(query)
+                        if (cursor.moveToFirst()) {
+                            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                            if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(statusIndex)) {
+                                val uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                                val uriString = cursor.getString(uriIndex)
+                                if (uriString != null) {
+                                    val uri = uriString.toUri()
+                                    installApk(ctxt, uri)
+                                }
+                            }
+                        }
+                        cursor.close()
+                    }
+                }
+            }
+
+            val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                filter,
+                ContextCompat.RECEIVER_EXPORTED
+            )
+
         } catch (e: Exception) {
             Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun installApk(context: Context, uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(uri, "application/vnd.android.package-archive")
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        try {
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Install Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 }
