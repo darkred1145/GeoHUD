@@ -11,6 +11,7 @@
         <item name="android:statusBarColor">#000000</item>
         <item name="android:windowBackground">#000000</item>
         <item name="android:navigationBarColor">#000000</item>
+
         <item name="colorSurface">#121212</item>
         <item name="colorOnSurface">#E0E0E0</item>
     </style>
@@ -19,18 +20,33 @@
         <item name="colorPrimary">#00E676</item>
         <item name="colorOnPrimary">#000000</item>
         <item name="colorSecondary">#B71C1C</item>
+
+        <item name="android:windowBackground">#000F05</item>
+        <item name="colorSurface">#001C08</item>
+        <item name="android:statusBarColor">#000F05</item>
+        <item name="android:navigationBarColor">#000F05</item>
     </style>
 
     <style name="Theme.GeoHUD.Azure" parent="Theme.GeoHUD">
         <item name="colorPrimary">#00B0FF</item>
         <item name="colorOnPrimary">#000000</item>
         <item name="colorSecondary">#FFD600</item>
+
+        <item name="android:windowBackground">#000510</item>
+        <item name="colorSurface">#000D21</item>
+        <item name="android:statusBarColor">#000510</item>
+        <item name="android:navigationBarColor">#000510</item>
     </style>
 
     <style name="Theme.GeoHUD.Amber" parent="Theme.GeoHUD">
         <item name="colorPrimary">#FFAB00</item>
         <item name="colorOnPrimary">#000000</item>
         <item name="colorSecondary">#00E676</item>
+
+        <item name="android:windowBackground">#140A00</item>
+        <item name="colorSurface">#211200</item>
+        <item name="android:statusBarColor">#140A00</item>
+        <item name="android:navigationBarColor">#140A00</item>
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">

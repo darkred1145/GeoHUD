@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black"
+    android:background="?attr/colorSurface"
     tools:context=".CameraActivity">
 
     <androidx.camera.view.PreviewView
@@ -16,11 +16,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="24dp"
-        android:alpha="0.5"
+        android:alpha="0.6"
         android:background="@drawable/bg_hud_overlay"
         android:backgroundTint="?attr/colorPrimary"
         android:backgroundTintMode="src_in"
-        tools:ignore="ContentDescription" />
+        android:importantForAccessibility="no" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/dataPanel"
@@ -41,7 +41,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:importantForAccessibility="no"
+            android:contentDescription="Return to Menu"
             android:padding="8dp"
             android:src="@android:drawable/ic_menu_revert"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +54,8 @@
             android:layout_width="1dp"
             android:layout_height="0dp"
             android:layout_marginStart="8dp"
-            android:background="#44FFFFFF"
+            android:alpha="0.3"
+            android:background="?attr/colorOnSurface"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/btnBack"
             app:layout_constraintTop_toTopOf="parent" />
@@ -96,7 +97,7 @@
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginHorizontal="64dp"
-        android:alpha="0.4"
+        android:alpha="0.5"
         android:background="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@id/btnCapture"
         app:layout_constraintEnd_toEndOf="parent"
@@ -109,8 +110,9 @@
         android:layout_height="80dp"
         android:layout_marginBottom="32dp"
         android:background="@drawable/bg_shutter_button"
+        android:contentDescription="Capture Photo"
         android:text=""
-        app:backgroundTint="@null"
+        app:backgroundTint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

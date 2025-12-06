@@ -12,8 +12,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Init Splash Screen
-        ThemeHelper.applyTheme(this)
         installSplashScreen()
+
+        // Apply Dynamic Colors (Material You)
+        ThemeHelper.applyTheme(this)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -29,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Launch Custom Gallery (Updated)
+        // Launch Custom Gallery
         galleryCard.setOnClickListener {
             val intent = Intent(this, GalleryActivity::class.java)
             startActivity(intent)
@@ -51,10 +54,10 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("How to Use GeoHUD")
             .setMessage("1. Grant all requested permissions.\n\n" +
-                "2. Use the 'Engage Camera' button to open the camera and capture images.\n\n" +
-                "3. Images are automatically tagged with your current GPS coordinates.\n\n" +
-                "4. Use the 'View Logs' button to see all your captured images.\n\n" +
-                "5. In the settings, you can customize the storage directory and the app's theme.")
+                    "2. Use the 'Engage Camera' button to open the camera and capture images.\n\n" +
+                    "3. Images are automatically tagged with your current GPS coordinates.\n\n" +
+                    "4. Use the 'View Logs' button to see all your captured images.\n\n" +
+                    "5. In the settings, you can customize the storage directory and the app's theme.")
             .setPositiveButton("Got it!", null)
             .show()
     }
