@@ -271,7 +271,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
                 val exif = ExifInterface(pfd.fileDescriptor)
                 exif.setLatLong(location.latitude, location.longitude)
                 if(location.hasAltitude()) {
-                    exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, location.altitude.toString())
+                    exif.setAltitude(location.altitude)
                 }
                 exif.saveAttributes()
                 Log.d("GeoHUD", "EXIF Data Injected")

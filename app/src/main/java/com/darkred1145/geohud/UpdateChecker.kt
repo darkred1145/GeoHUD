@@ -2,6 +2,7 @@ package com.darkred1145.geohud
 
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -145,23 +146,20 @@ object UpdateChecker {
             val receiver = object : BroadcastReceiver() {
                 override fun onReceive(ctxt: Context, intent: Intent) {
                     val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                    if (id == downloadId) {
-                        try { ctxt.unregisterReceiver(this) } catch (_: Exception) {}
+                    if (id != downloadId) return
 
-                        val query = DownloadManager.Query().setFilterById(downloadId)
-                        val cursor = dm.query(query)
+                    try { ctxt.unregisterReceiver(this) } catch (_: Exception) {}
+
+                    val query = DownloadManager.Query().setFilterById(downloadId)
+                    dm.query(query)?.use { cursor ->
                         if (cursor.moveToFirst()) {
                             val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
                             if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(statusIndex)) {
-                                val uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
-                                val uriString = cursor.getString(uriIndex)
-                                if (uriString != null) {
-                                    val uri = uriString.toUri()
-                                    installApk(ctxt, uri)
-                                }
+                                installApk(ctxt, ContentUris.withAppendedId(Uri.parse("content://downloads/my_downloads"), downloadId))
+                            } else {
+                                Toast.makeText(ctxt, "Download failed.", Toast.LENGTH_LONG).show()
                             }
                         }
-                        cursor.close()
                     }
                 }
             }
@@ -169,10 +167,10 @@ object UpdateChecker {
             val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
 
             ContextCompat.registerReceiver(
-                context,
+                context.applicationContext,
                 receiver,
                 filter,
-                ContextCompat.RECEIVER_EXPORTED
+                ContextCompat.RECEIVER_NOT_EXPORTED
             )
 
         } catch (e: Exception) {
