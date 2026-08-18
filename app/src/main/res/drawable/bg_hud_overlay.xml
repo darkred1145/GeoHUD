@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:top="0dp" android:left="0dp" android:width="40dp" android:height="40dp">
+    <item android:top="0dp" android:left="0dp" android:width="56dp" android:height="56dp">
         <shape>
-            <stroke android:width="3dp" android:color="?attr/colorPrimary" />
+            <corners android:radius="6dp" />
+            <stroke android:width="4dp" android:color="?attr/colorPrimary" />
         </shape>
     </item>
 
-    <item android:top="0dp" android:right="0dp" android:width="40dp" android:height="40dp" android:gravity="right">
+    <item android:top="0dp" android:right="0dp" android:width="56dp" android:height="56dp" android:gravity="right">
         <shape>
-            <stroke android:width="3dp" android:color="?attr/colorPrimary" />
+            <corners android:radius="6dp" />
+            <stroke android:width="4dp" android:color="?attr/colorPrimary" />
         </shape>
     </item>
 
-    <item android:bottom="0dp" android:left="0dp" android:width="40dp" android:height="40dp" android:gravity="bottom">
+    <item android:bottom="0dp" android:left="0dp" android:width="56dp" android:height="56dp" android:gravity="bottom">
         <shape>
-            <stroke android:width="3dp" android:color="?attr/colorPrimary" />
+            <corners android:radius="6dp" />
+            <stroke android:width="4dp" android:color="?attr/colorPrimary" />
         </shape>
     </item>
 
-    <item android:bottom="0dp" android:right="0dp" android:width="40dp" android:height="40dp" android:gravity="bottom|right">
+    <item android:bottom="0dp" android:right="0dp" android:width="56dp" android:height="56dp" android:gravity="bottom|right">
         <shape>
-            <stroke android:width="3dp" android:color="?attr/colorPrimary" />
+            <corners android:radius="6dp" />
+            <stroke android:width="4dp" android:color="?attr/colorPrimary" />
         </shape>
     </item>
 
-    <item android:width="20dp" android:height="20dp" android:gravity="center">
-        <vector
-            android:width="24dp"
-            android:height="24dp"
-            android:viewportWidth="24"
-            android:viewportHeight="24">
-            <path android:fillColor="?attr/colorPrimary" android:pathData="M11,11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
-        </vector>
+    <item android:width="40dp" android:height="40dp" android:gravity="center">
+        <shape android:shape="oval">
+            <stroke android:width="2dp" android:color="?attr/colorPrimary" />
+        </shape>
     </item>
+
+    <item android:width="8dp" android:height="8dp" android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="?attr/colorPrimary" />
+        </shape>
+    </item>
+
 </layer-list>

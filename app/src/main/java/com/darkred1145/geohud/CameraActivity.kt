@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -40,12 +39,16 @@ class CameraActivity : AppCompatActivity(), LocationListener {
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private lateinit var locationManager: LocationManager
+    private var flashMode = ImageCapture.FLASH_MODE_OFF
+    private var usingFrontCamera = false
 
     // UI Elements
     private lateinit var viewFinder: PreviewView
     private lateinit var txtLocation: TextView
     private lateinit var txtStatus: TextView
-    private lateinit var btnCapture: Button
+    private lateinit var btnCapture: ImageButton
+    private lateinit var btnFlash: ImageButton
+    private lateinit var btnSwap: ImageButton
     private lateinit var btnBack: ImageButton
 
     private var currentLocation: Location? = null
@@ -74,6 +77,8 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         txtLocation = findViewById(R.id.txtLocation)
         txtStatus = findViewById(R.id.txtStatus)
         btnCapture = findViewById(R.id.btnCapture)
+        btnFlash = findViewById(R.id.btnFlash)
+        btnSwap = findViewById(R.id.btnSwap)
         btnBack = findViewById(R.id.btnBack)
 
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -82,6 +87,11 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         // Button Logic
         btnCapture.setOnClickListener { takePhoto() }
         btnBack.setOnClickListener { finish() } // Return to Dashboard
+        btnFlash.setOnClickListener { toggleFlash() }
+        btnSwap.setOnClickListener {
+            usingFrontCamera = !usingFrontCamera
+            startCamera()
+        }
 
         // Permission Check
         if (allPermissionsGranted()) {
@@ -116,10 +126,15 @@ class CameraActivity : AppCompatActivity(), LocationListener {
 
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                .setFlashMode(flashMode)
                 .build()
 
-            // Select Back Camera
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            // Select Camera
+            val cameraSelector = if (usingFrontCamera) {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            } else {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            }
 
             try {
                 cameraProvider.unbindAll()
@@ -224,6 +239,18 @@ class CameraActivity : AppCompatActivity(), LocationListener {
 
     @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
+    private fun toggleFlash() {
+        flashMode = if (flashMode == ImageCapture.FLASH_MODE_ON) {
+            ImageCapture.FLASH_MODE_OFF
+        } else {
+            ImageCapture.FLASH_MODE_ON
+        }
+        imageCapture?.flashMode = flashMode
+        btnFlash.setImageResource(
+            if (flashMode == ImageCapture.FLASH_MODE_ON) R.drawable.ic_flash_on else R.drawable.ic_flash_off
+        )
+    }
 
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return

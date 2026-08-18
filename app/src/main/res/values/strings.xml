@@ -28,6 +28,8 @@
     <string name="toast_no_position">WARNING: NO POSITION DATA</string>
     <string name="cd_back">Return to Menu</string>
     <string name="cd_capture">Capture Photo</string>
+    <string name="cd_flash">Toggle Flash</string>
+    <string name="cd_swap">Switch Camera</string>
 
     <!-- Gallery screen -->
     <string name="title_archive">IMAGE ARCHIVE</string>
