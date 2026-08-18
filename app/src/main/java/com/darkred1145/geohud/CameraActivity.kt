@@ -99,7 +99,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             startCamera()
             startLocationUpdates()
         } else {
-            Toast.makeText(this, "SENSORS DISABLED: PERMISSION DENIED", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.toast_permission_denied, Toast.LENGTH_LONG).show()
             finish()
         }
     }
@@ -136,7 +136,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (!isGpsEnabled && !isNetworkEnabled) {
-            txtStatus.text = "!!! NO SIGNAL SOURCES FOUND !!!"
+            txtStatus.text = getString(R.string.status_no_signal)
             txtStatus.setTextColor(Color.RED)
             return
         }
@@ -169,7 +169,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             // Update UI with the cached location immediately
             updateLocationUI(bestLocation, isCached = true)
         } else {
-            txtStatus.text = "/// SCANNING ALL BANDS... ///"
+            txtStatus.text = getString(R.string.status_scanning)
             txtStatus.setTextColor("#D32F2F".toColorInt())
         }
     }
@@ -193,25 +193,29 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             val isFresh = ageInMillis < 120 * 1000 // Considered "Fresh" if less than 2 minutes old
 
             if (isFresh) {
-                txtStatus.text = "/// TARGET LOCKED (CACHED) ///"
+                txtStatus.text = getString(R.string.status_locked_cached)
                 txtStatus.setTextColor(Color.YELLOW) // Warning: Not live, but usable
             } else {
-                txtStatus.text = "/// LAST KNOWN POS (STALE) ///"
+                txtStatus.text = getString(R.string.status_last_known)
                 txtStatus.setTextColor(Color.RED) // Error: Data is old, wait for lock
             }
         } else {
             // Live Data
-            val source = if (location.provider == LocationManager.GPS_PROVIDER) "SAT" else "NET"
-            txtStatus.text = "/// LOCKED ($source) ///"
+            val source = if (location.provider == LocationManager.GPS_PROVIDER) {
+                getString(R.string.source_gps)
+            } else {
+                getString(R.string.source_network)
+            }
+            txtStatus.text = getString(R.string.status_locked, source)
             txtStatus.setTextColor("#00E676".toColorInt()) // Green: Good to go
         }
 
         // 2. Update Coordinate Display
         if (location.hasAltitude()) {
             val alt = "${location.altitude.roundToInt()}m"
-            txtLocation.text = "LAT: $lat\nLON: $lon\nALT: $alt"
+            txtLocation.text = getString(R.string.coords_3line, lat, lon, alt)
         } else {
-            txtLocation.text = "LAT: $lat\nLON: $lon"
+            txtLocation.text = getString(R.string.coords_2line, lat, lon)
         }
     }
 
@@ -228,7 +232,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             .format(System.currentTimeMillis())
 
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "TAG_$name")
+            put(MediaStore.MediaColumns.DISPLAY_NAME, getString(R.string.photo_name_format, name))
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/GeoHUD")
@@ -255,9 +259,9 @@ class CameraActivity : AppCompatActivity(), LocationListener {
                     if (savedUri != null) {
                         if (currentLocation != null) {
                             writeGeoTag(savedUri, currentLocation!!)
-                            Toast.makeText(baseContext, "IMAGE SECURED + GEO-TAGGED", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(baseContext, R.string.toast_image_secured, Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(baseContext, "WARNING: NO POSITION DATA", Toast.LENGTH_LONG).show()
+                            Toast.makeText(baseContext, R.string.toast_no_position, Toast.LENGTH_LONG).show()
                         }
                     }
                 }

@@ -1,6 +1,5 @@
 package com.darkred1145.geohud
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -78,44 +77,34 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun loadPreferences() {
         val sharedPref = getSharedPreferences("GeoHUDPrefs", MODE_PRIVATE)
         val savedUriString = sharedPref.getString("save_directory", null)
         if (savedUriString != null) {
             updatePathUI(savedUriString.toUri())
         } else {
-            txtCurrentPath.text = "/Pictures/GeoHUD (Default)"
+            txtCurrentPath.text = getString(R.string.default_path)
         }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updatePathUI(uri: Uri) {
         val documentFile = DocumentFile.fromTreeUri(this, uri)
         val name = documentFile?.name ?: uri.path
-        txtCurrentPath.text = "EXTERNAL: $name"
+        txtCurrentPath.text = getString(R.string.path_external_format, name)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updateVersionInfo() {
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
             val longVersionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
-            txtVersion.text = "VERSION: $versionName\nBUILD: $longVersionCode\nDEV: DARKRED1145"
+            txtVersion.text = getString(R.string.about_format, versionName, longVersionCode)
         } catch (_: PackageManager.NameNotFoundException) {
-            txtVersion.text = "VERSION: UNKNOWN"
+            txtVersion.text = getString(R.string.about_unknown)
         }
     }
 
     private fun showThemeSelector() {
-        // UPDATED LIST FOR ANIME CHARACTERS
-        val themeNames = mutableListOf(
-            "Miku (01 Teal)",
-            "Rem (Maid Blue)",
-            "Luka (V4 Pink)",
-            "Rin/Len (Voltage)"
-        )
         val themeCodes = mutableListOf(
             ThemeHelper.THEME_MIKU,
             ThemeHelper.THEME_REM,
@@ -124,27 +113,28 @@ class SettingsActivity : AppCompatActivity() {
         )
 
         if (DynamicColors.isDynamicColorAvailable()) {
-            themeNames.add("System (Material You)")
             themeCodes.add(ThemeHelper.THEME_MATERIAL_YOU)
         }
+
+        val themeNames = themeCodes.map { ThemeHelper.getThemeName(it) }
 
         val currentCode = ThemeHelper.getCurrentTheme(this)
         val checkedItem = themeCodes.indexOf(currentCode).coerceAtLeast(0)
 
         MaterialAlertDialogBuilder(this)
-            .setTitle("SELECT INTERFACE SKIN")
+            .setTitle(R.string.dialog_title_theme)
             .setSingleChoiceItems(themeNames.toTypedArray(), checkedItem) { dialog, which ->
                 val selectedCode = themeCodes[which]
                 ThemeHelper.saveThemePreference(this, selectedCode)
                 dialog.dismiss()
                 restartApp()
             }
-            .setNegativeButton("CANCEL", null)
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
 
     private fun restartApp() {
-        Toast.makeText(this, "REBOOTING INTERFACE...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.toast_rebooting, Toast.LENGTH_SHORT).show()
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)

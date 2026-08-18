@@ -1,3 +1,82 @@
 <resources>
     <string name="app_name">GeoHUD</string>
+
+    <!-- Main screen -->
+    <string name="title_main">GEOHUD</string>
+    <string name="subtitle_main">TACTICAL GEO-LOGGER</string>
+    <string name="status_main_ready">SYSTEM READY // GPS STANDBY</string>
+    <string name="action_camera">ENGAGE CAMERA</string>
+    <string name="action_gallery">VIEW LOGS</string>
+    <string name="action_how_to">HOW-TO</string>
+    <string name="cd_settings">Settings</string>
+
+    <!-- Camera screen -->
+    <string name="status_searching">/// SAT-LINK: SEARCHING ///</string>
+    <string name="coords_placeholder">LAT: --.-----   LON: --.-----</string>
+    <string name="status_no_signal">!!! NO SIGNAL SOURCES FOUND !!!</string>
+    <string name="status_scanning">/// SCANNING ALL BANDS... ///</string>
+    <string name="status_locked_cached">/// TARGET LOCKED (CACHED) ///</string>
+    <string name="status_last_known">/// LAST KNOWN POS (STALE) ///</string>
+    <string name="status_locked">/// LOCKED (%1$s) ///</string>
+    <string name="source_gps">SAT</string>
+    <string name="source_network">NET</string>
+    <string name="coords_2line">LAT: %1$s\nLON: %2$s</string>
+    <string name="coords_3line">LAT: %1$s\nLON: %2$s\nALT: %3$s</string>
+    <string name="photo_name_format">TAG_%1$s</string>
+    <string name="toast_permission_denied">SENSORS DISABLED: PERMISSION DENIED</string>
+    <string name="toast_image_secured">IMAGE SECURED + GEO-TAGGED</string>
+    <string name="toast_no_position">WARNING: NO POSITION DATA</string>
+    <string name="cd_back">Return to Menu</string>
+    <string name="cd_capture">Capture Photo</string>
+
+    <!-- Gallery screen -->
+    <string name="title_archive">IMAGE ARCHIVE</string>
+    <string name="subtitle_archive">LOCAL STORAGE // CAPTURE ARCHIVE</string>
+    <string name="empty_gallery">NO INTEL FOUND</string>
+    <string name="cd_thumbnail">Log Thumbnail</string>
+    <string name="date_unknown">— —</string>
+
+    <!-- Settings screen -->
+    <string name="title_settings">CONFIGURATION</string>
+    <string name="section_storage">DATA STORAGE</string>
+    <string name="label_target_dir">TARGET DIRECTORY</string>
+    <string name="default_path">/Pictures/GeoHUD (Default)</string>
+    <string name="path_external_format">EXTERNAL: %1$s</string>
+    <string name="btn_change_path">CHANGE PATH</string>
+    <string name="section_interface">INTERFACE</string>
+    <string name="label_hud_theme">HUD THEME</string>
+    <string name="theme_button_placeholder">MIKU (01 TEAL)</string>
+    <string name="section_system">SYSTEM</string>
+    <string name="label_check_updates">CHECK FOR UPDATES</string>
+    <string name="btn_scan_network">SCAN NETWORK</string>
+    <string name="label_about">ABOUT GeoHUD</string>
+    <string name="about_placeholder">VERSION: --\nBUILD: --\nDEV: DARKRED1145</string>
+    <string name="about_format">VERSION: %1$s\nBUILD: %2$s\nDEV: DARKRED1145</string>
+    <string name="about_unknown">VERSION: UNKNOWN</string>
+    <string name="dialog_title_theme">SELECT INTERFACE SKIN</string>
+    <string name="btn_cancel">CANCEL</string>
+    <string name="toast_rebooting">REBOOTING INTERFACE...</string>
+
+    <!-- Instructions dialog -->
+    <string name="dialog_title_howto">How to Use GeoHUD</string>
+    <string name="dialog_body_howto">1. Grant all requested permissions.\n\n2. Use the \'Engage Camera\' button to open the camera and capture images.\n\n3. Images are automatically tagged with your current GPS coordinates.\n\n4. Use the \'View Logs\' button to see all your captured images.\n\n5. In the settings, you can customize the storage directory and the app\'s theme.</string>
+    <string name="btn_got_it">Got it!</string>
+
+    <!-- Update checker -->
+    <string name="toast_no_internet">No internet connection.</string>
+    <string name="toast_up_to_date">System is up to date.</string>
+    <string name="toast_check_failed">Update check failed: %1$s</string>
+    <string name="dialog_title_update">New Intel Available</string>
+    <string name="dialog_body_update">Version %1$s detected.\nCurrent: %2$s</string>
+    <string name="btn_update">Initialize Update</string>
+    <string name="btn_abort">Abort</string>
+    <string name="notif_download_title">Downloading GeoHUD Update</string>
+    <string name="notif_download_desc">Version %1$s</string>
+    <string name="toast_download_started">Download initiated...</string>
+    <string name="toast_download_failed">Download failed.</string>
+    <string name="toast_download_error">Download failed: %1$s</string>
+    <string name="toast_install_error">Install Error: %1$s</string>
+
+    <!-- Placeholder -->
+    <string name="placeholder_date">DEC 06</string>
 </resources>

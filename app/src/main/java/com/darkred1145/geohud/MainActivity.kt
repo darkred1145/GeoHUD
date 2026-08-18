@@ -52,13 +52,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showInstructionsDialog() {
         AlertDialog.Builder(this)
-            .setTitle("How to Use GeoHUD")
-            .setMessage("1. Grant all requested permissions.\n\n" +
-                    "2. Use the 'Engage Camera' button to open the camera and capture images.\n\n" +
-                    "3. Images are automatically tagged with your current GPS coordinates.\n\n" +
-                    "4. Use the 'View Logs' button to see all your captured images.\n\n" +
-                    "5. In the settings, you can customize the storage directory and the app's theme.")
-            .setPositiveButton("Got it!", null)
+            .setTitle(R.string.dialog_title_howto)
+            .setMessage(R.string.dialog_body_howto)
+            .setPositiveButton(R.string.btn_got_it, null)
             .show()
     }
 }

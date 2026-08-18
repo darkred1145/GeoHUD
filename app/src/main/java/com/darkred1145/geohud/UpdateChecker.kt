@@ -68,7 +68,7 @@ object UpdateChecker {
         val nc = cm.getNetworkCapabilities(cm.activeNetwork)
         if (nc == null || !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.toast_no_internet, Toast.LENGTH_SHORT).show()
             }
             return
         }
@@ -87,12 +87,16 @@ object UpdateChecker {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "System is up to date.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.toast_up_to_date, Toast.LENGTH_SHORT).show()
                 }
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Update check failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.toast_check_failed, e.message),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -112,9 +116,9 @@ object UpdateChecker {
 
     private fun showUpdateDialog(context: Context, release: GitHubRelease, localVer: String) {
         AlertDialog.Builder(context)
-            .setTitle("New Intel Available")
-            .setMessage("Version ${release.tagName} detected.\nCurrent: $localVer")
-            .setPositiveButton("Initialize Update") { _, _ ->
+            .setTitle(R.string.dialog_title_update)
+            .setMessage(context.getString(R.string.dialog_body_update, release.tagName, localVer))
+            .setPositiveButton(R.string.btn_update) { _, _ ->
                 val apkAsset = release.assets.find { it.name.endsWith(".apk", true) }
                 if (apkAsset != null) {
                     downloadAndInstall(context, apkAsset.browserDownloadUrl, release.tagName)
@@ -123,7 +127,7 @@ object UpdateChecker {
                     context.startActivity(intent)
                 }
             }
-            .setNegativeButton("Abort", null)
+            .setNegativeButton(R.string.btn_abort, null)
             .show()
     }
 
@@ -131,8 +135,8 @@ object UpdateChecker {
         try {
             val fileName = "GeoHUD-$version.apk"
             val request = DownloadManager.Request(url.toUri())
-                .setTitle("Downloading GeoHUD Update")
-                .setDescription("Version $version")
+                .setTitle(context.getString(R.string.notif_download_title))
+                .setDescription(context.getString(R.string.notif_download_desc, version))
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                 .setMimeType("application/vnd.android.package-archive")
@@ -140,7 +144,7 @@ object UpdateChecker {
             val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             val downloadId = dm.enqueue(request)
 
-            Toast.makeText(context, "Download initiated...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.toast_download_started, Toast.LENGTH_SHORT).show()
 
             // REGISTER RECEIVER FOR AUTO-INSTALL
             val receiver = object : BroadcastReceiver() {
@@ -157,7 +161,7 @@ object UpdateChecker {
                             if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(statusIndex)) {
                                 installApk(ctxt, ContentUris.withAppendedId(Uri.parse("content://downloads/my_downloads"), downloadId))
                             } else {
-                                Toast.makeText(ctxt, "Download failed.", Toast.LENGTH_LONG).show()
+                                Toast.makeText(ctxt, R.string.toast_download_failed, Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -174,7 +178,11 @@ object UpdateChecker {
             )
 
         } catch (e: Exception) {
-            Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.toast_download_error, e.message),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -187,7 +195,11 @@ object UpdateChecker {
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-            Toast.makeText(context, "Install Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.toast_install_error, e.message),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 }
