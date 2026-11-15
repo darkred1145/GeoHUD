@@ -1,14 +1,11 @@
 package com.darkred1145.geohud
 
-import android.content.Context
 import android.net.Uri
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import java.io.File
@@ -16,10 +13,20 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** A capture that can live in MediaStore, a SAF tree, or app-specific storage. */
+sealed interface GalleryItem {
+    val dateMillis: Long
+
+    data class Media(val uri: Uri, override val dateMillis: Long) : GalleryItem
+    data class Local(val file: File, override val dateMillis: Long) : GalleryItem
+}
+
 class GalleryAdapter(
-    private val images: List<Any>, // Can be File or Uri
-    private val onClick: (Any) -> Unit
+    private val images: List<GalleryItem>,
+    private val onClick: (GalleryItem) -> Unit
 ) : RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
+
+    private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imgThumbnail: ImageView = view.findViewById(R.id.imgThumbnail)
@@ -34,51 +41,24 @@ class GalleryAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = images[position]
+        val source: Any = when (item) {
+            is GalleryItem.Media -> item.uri
+            is GalleryItem.Local -> item.file
+        }
 
         // Use Coil to load image efficiently
-        holder.imgThumbnail.load(item) {
+        holder.imgThumbnail.load(source) {
             crossfade(true)
             placeholder(android.R.drawable.ic_menu_gallery)
         }
 
-        holder.txtDate.text = formatDate(holder.itemView.context, item)
+        holder.txtDate.text = if (item.dateMillis > 0L) {
+            dateFormat.format(Date(item.dateMillis))
+        } else {
+            holder.itemView.context.getString(R.string.date_unknown)
+        }
 
         holder.itemView.setOnClickListener { onClick(item) }
-    }
-
-    private fun formatDate(context: Context, item: Any): String {
-        val millis: Long = when (item) {
-            is File -> item.lastModified()
-            is Uri -> retrieveDateTaken(context, item)
-                ?: DocumentFile.fromSingleUri(context, item)?.lastModified()
-                ?: 0L
-            else -> 0L
-        }
-        return if (millis > 0L) {
-            SimpleDateFormat("MMM dd", Locale.US).format(Date(millis))
-        } else {
-            context.getString(R.string.date_unknown)
-        }
-    }
-
-    private fun retrieveDateTaken(context: Context, uri: Uri): Long? {
-        return try {
-            context.contentResolver.query(
-                uri,
-                arrayOf(MediaStore.Images.Media.DATE_TAKEN),
-                null,
-                null,
-                null
-            )?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    cursor.getLong(0).takeIf { it > 0L }
-                } else {
-                    null
-                }
-            }
-        } catch (_: Exception) {
-            null
-        }
     }
 
     override fun getItemCount() = images.size

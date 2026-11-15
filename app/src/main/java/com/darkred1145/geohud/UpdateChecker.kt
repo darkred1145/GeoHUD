@@ -1,8 +1,8 @@
 package com.darkred1145.geohud
 
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -10,9 +10,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Environment
+import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,7 +25,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.GET
-import kotlin.math.max
+import java.io.File
 
 object UpdateChecker {
 
@@ -81,7 +83,7 @@ object UpdateChecker {
             val remoteVer = latestRelease.tagName.replace("v", "", ignoreCase = true).trim()
             val localVer = BuildConfig.VERSION_NAME.replace("v", "", ignoreCase = true).trim()
 
-            if (isRemoteNewer(remoteVer, localVer)) {
+            if (Version.isRemoteNewer(remoteVer, localVer)) {
                 withContext(Dispatchers.Main) {
                     showUpdateDialog(context, latestRelease, localVer)
                 }
@@ -101,83 +103,132 @@ object UpdateChecker {
         }
     }
 
-    private fun isRemoteNewer(remote: String, local: String): Boolean {
-        val rParts = remote.split(".").map { it.toIntOrNull() ?: 0 }
-        val lParts = local.split(".").map { it.toIntOrNull() ?: 0 }
-        val length = max(rParts.size, lParts.size)
-        for (i in 0 until length) {
-            val r = rParts.getOrElse(i) { 0 }
-            val l = lParts.getOrElse(i) { 0 }
-            if (r > l) return true
-            if (r < l) return false
-        }
-        return false
-    }
-
     private fun showUpdateDialog(context: Context, release: GitHubRelease, localVer: String) {
+        if (context is Activity && (context.isFinishing || context.isDestroyed)) return
+
         AlertDialog.Builder(context)
             .setTitle(R.string.dialog_title_update)
             .setMessage(context.getString(R.string.dialog_body_update, release.tagName, localVer))
             .setPositiveButton(R.string.btn_update) { _, _ ->
-                val apkAsset = release.assets.find { it.name.endsWith(".apk", true) }
-                if (apkAsset != null) {
-                    downloadAndInstall(context, apkAsset.browserDownloadUrl, release.tagName)
+                if (!context.packageManager.canRequestPackageInstalls()) {
+                    requestInstallPermission(context)
                 } else {
-                    val intent = Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri())
-                    context.startActivity(intent)
+                    val apkAsset = release.assets.find { it.name.endsWith(".apk", true) }
+                    if (apkAsset != null) {
+                        downloadAndInstall(context, apkAsset.browserDownloadUrl, release.tagName)
+                    } else {
+                        val intent = Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri())
+                        context.startActivity(intent)
+                    }
                 }
             }
             .setNegativeButton(R.string.btn_abort, null)
             .show()
     }
 
-    private fun downloadAndInstall(context: Context, url: String, version: String) {
+    private fun requestInstallPermission(context: Context) {
+        Toast.makeText(context, R.string.toast_allow_install, Toast.LENGTH_LONG).show()
         try {
-            val fileName = "GeoHUD-$version.apk"
-            val request = DownloadManager.Request(url.toUri())
-                .setTitle(context.getString(R.string.notif_download_title))
-                .setDescription(context.getString(R.string.notif_download_desc, version))
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                .setMimeType("application/vnd.android.package-archive")
+            val intent = Intent(
+                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                "package:${context.packageName}".toUri()
+            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.toast_install_error, e.message),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
-            val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val downloadId = dm.enqueue(request)
+    private fun downloadAndInstall(context: Context, url: String, version: String) {
+        val appContext = context.applicationContext
+        val dm = appContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val safeVersion = version.replace(Regex("[^A-Za-z0-9._-]"), "_")
+        val fileName = "GeoHUD-$safeVersion-${System.currentTimeMillis()}.apk"
 
-            Toast.makeText(context, R.string.toast_download_started, Toast.LENGTH_SHORT).show()
+        val request = DownloadManager.Request(url.toUri())
+            .setTitle(context.getString(R.string.notif_download_title))
+            .setDescription(context.getString(R.string.notif_download_desc, version))
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+            .setDestinationInExternalFilesDir(
+                appContext,
+                Environment.DIRECTORY_DOWNLOADS,
+                fileName
+            )
+            .setMimeType("application/vnd.android.package-archive")
 
-            // REGISTER RECEIVER FOR AUTO-INSTALL
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(ctxt: Context, intent: Intent) {
-                    val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                    if (id != downloadId) return
+        var expectedId = -1L
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctxt: Context, intent: Intent) {
+                val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+                if (id != expectedId) return
 
-                    try { ctxt.unregisterReceiver(this) } catch (_: Exception) {}
+                try {
+                    appContext.unregisterReceiver(this)
+                } catch (_: Exception) {
+                }
 
-                    val query = DownloadManager.Query().setFilterById(downloadId)
-                    dm.query(query)?.use { cursor ->
+                val status = try {
+                    dm.query(DownloadManager.Query().setFilterById(id))?.use { cursor ->
                         if (cursor.moveToFirst()) {
-                            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                            if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(statusIndex)) {
-                                installApk(ctxt, ContentUris.withAppendedId(Uri.parse("content://downloads/my_downloads"), downloadId))
-                            } else {
-                                Toast.makeText(ctxt, R.string.toast_download_failed, Toast.LENGTH_LONG).show()
-                            }
+                            cursor.getInt(
+                                cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
+                            )
+                        } else {
+                            -1
                         }
+                    } ?: -1
+                } catch (e: Exception) {
+                    -1
+                }
+
+                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    val apkUri = try {
+                        val file = File(
+                            appContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                            fileName
+                        )
+                        if (file.isFile) {
+                            FileProvider.getUriForFile(
+                                appContext,
+                                "${appContext.packageName}.provider",
+                                file
+                            )
+                        } else {
+                            dm.getUriForDownloadedFile(id)
+                        }
+                    } catch (e: Exception) {
+                        null
                     }
+                    if (apkUri != null) {
+                        installApk(ctxt, apkUri)
+                    } else {
+                        Toast.makeText(ctxt, R.string.toast_download_failed, Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Toast.makeText(ctxt, R.string.toast_download_failed, Toast.LENGTH_LONG).show()
                 }
             }
+        }
 
-            val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-
+        try {
+            // Register before enqueue so a fast download cannot outrun the receiver.
             ContextCompat.registerReceiver(
-                context.applicationContext,
+                appContext,
                 receiver,
-                filter,
-                ContextCompat.RECEIVER_NOT_EXPORTED
+                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                ContextCompat.RECEIVER_EXPORTED
             )
-
+            expectedId = dm.enqueue(request)
+            Toast.makeText(context, R.string.toast_download_started, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
+            try {
+                appContext.unregisterReceiver(receiver)
+            } catch (_: Exception) {
+            }
             Toast.makeText(
                 context,
                 context.getString(R.string.toast_download_error, e.message),

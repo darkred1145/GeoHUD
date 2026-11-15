@@ -2,13 +2,10 @@ package com.darkred1145.geohud
 
 import android.app.Activity
 import android.content.Context
-import com.google.android.material.color.DynamicColors
 import androidx.core.content.edit
+import com.google.android.material.color.DynamicColors
 
 object ThemeHelper {
-    private const val PREF_NAME = "GeoHUDPrefs"
-    private const val KEY_THEME = "app_theme"
-
     // UPDATED THEME CONSTANTS
     const val THEME_MIKU = "theme_miku_01"
     const val THEME_REM = "theme_rem_blue"
@@ -17,8 +14,8 @@ object ThemeHelper {
     const val THEME_MATERIAL_YOU = "material_you"
 
     fun applyTheme(activity: Activity) {
-        val sharedPref = activity.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val theme = sharedPref.getString(KEY_THEME, THEME_MIKU)
+        val sharedPref = activity.getSharedPreferences(Prefs.FILE, Context.MODE_PRIVATE)
+        val theme = sharedPref.getString(Prefs.KEY_THEME, THEME_MIKU)
 
         // Map constants to the new XML styles
         when (theme) {
@@ -34,25 +31,26 @@ object ThemeHelper {
     }
 
     fun saveThemePreference(context: Context, themeMode: String) {
-        val sharedPref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val sharedPref = context.getSharedPreferences(Prefs.FILE, Context.MODE_PRIVATE)
         sharedPref.edit {
-            putString(KEY_THEME, themeMode)
+            putString(Prefs.KEY_THEME, themeMode)
         }
     }
 
     fun getCurrentTheme(context: Context): String {
-        val sharedPref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return sharedPref.getString(KEY_THEME, THEME_MIKU) ?: THEME_MIKU
+        val sharedPref = context.getSharedPreferences(Prefs.FILE, Context.MODE_PRIVATE)
+        return sharedPref.getString(Prefs.KEY_THEME, THEME_MIKU) ?: THEME_MIKU
     }
 
-    // UPDATED UI DISPLAY NAMES
-    fun getThemeName(code: String): String {
-        return when(code) {
-            THEME_MATERIAL_YOU -> "SYSTEM (MATERIAL YOU)"
-            THEME_REM -> "REM (MAID BLUE)"
-            THEME_LUKA -> "LUKA (V4 PINK)"
-            THEME_RIN -> "RIN/LEN (VOLTAGE)"
-            else -> "MIKU (01 TEAL)"
-        }
+    fun getThemeName(context: Context, code: String): String {
+        return context.getString(
+            when (code) {
+                THEME_MATERIAL_YOU -> R.string.theme_name_material_you
+                THEME_REM -> R.string.theme_name_rem
+                THEME_LUKA -> R.string.theme_name_luka
+                THEME_RIN -> R.string.theme_name_rin
+                else -> R.string.theme_name_miku
+            }
+        )
     }
 }

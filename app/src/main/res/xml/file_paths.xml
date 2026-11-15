@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Allow access to external storage (Pictures, DCIM, etc.) -->
-    <external-path name="external_files" path="." />
+    <!-- App-specific external storage (legacy captures). -->
+    <external-files-path
+        name="app_pictures"
+        path="Pictures/" />
 
-    <!-- Allow access to internal app storage (if you save there) -->
-    <files-path name="internal_files" path="." />
+    <!-- Downloaded update APK. -->
+    <external-files-path
+        name="app_downloads"
+        path="Download/" />
 
-    <!-- Allow access to cache (for temporary shares) -->
-    <cache-path name="cache_files" path="." />
+    <!-- Legacy public captures on API 26-28. Keep scope narrow. -->
+    <external-path
+        name="public_pictures"
+        path="Pictures/GeoHUD/" />
+
+    <!-- Temporary share/export staging. -->
+    <cache-path
+        name="cache_files"
+        path="." />
 </paths>

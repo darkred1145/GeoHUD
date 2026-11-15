@@ -14,6 +14,7 @@
     <string name="status_searching">/// SAT-LINK: SEARCHING ///</string>
     <string name="coords_placeholder">LAT: --.-----   LON: --.-----</string>
     <string name="status_no_signal">!!! NO SIGNAL SOURCES FOUND !!!</string>
+    <string name="status_no_location_permission">!!! LOCATION PERMISSION DENIED !!!</string>
     <string name="status_scanning">/// SCANNING ALL BANDS... ///</string>
     <string name="status_locked_cached">/// TARGET LOCKED (CACHED) ///</string>
     <string name="status_last_known">/// LAST KNOWN POS (STALE) ///</string>
@@ -22,10 +23,16 @@
     <string name="source_network">NET</string>
     <string name="coords_2line">LAT: %1$s\nLON: %2$s</string>
     <string name="coords_3line">LAT: %1$s\nLON: %2$s\nALT: %3$s</string>
-    <string name="photo_name_format">TAG_%1$s</string>
+    <string name="coords_3line_acc">LAT: %1$s\nLON: %2$s\nACC: ±%3$s m</string>
+    <string name="coords_4line">LAT: %1$s\nLON: %2$s\nALT: %3$s\nACC: ±%4$s m</string>
+    <string name="photo_name_format">TAG_%1$s.jpg</string>
     <string name="toast_permission_denied">SENSORS DISABLED: PERMISSION DENIED</string>
     <string name="toast_image_secured">IMAGE SECURED + GEO-TAGGED</string>
     <string name="toast_no_position">WARNING: NO POSITION DATA</string>
+    <string name="toast_capture_failed">CAPTURE FAILED</string>
+    <string name="toast_exif_failed">IMAGE SAVED // GEO-TAG FAILED</string>
+    <string name="toast_camera_failed">CAMERA UNAVAILABLE</string>
+    <string name="toast_no_front_camera">NO FRONT CAMERA</string>
     <string name="cd_back">Return to Menu</string>
     <string name="cd_capture">Capture Photo</string>
     <string name="cd_flash">Toggle Flash</string>
@@ -37,6 +44,7 @@
     <string name="empty_gallery">NO INTEL FOUND</string>
     <string name="cd_thumbnail">Log Thumbnail</string>
     <string name="date_unknown">— —</string>
+    <string name="toast_no_viewer">NO IMAGE VIEWER FOUND</string>
 
     <!-- Settings screen -->
     <string name="title_settings">CONFIGURATION</string>
@@ -45,6 +53,7 @@
     <string name="default_path">/Pictures/GeoHUD (Default)</string>
     <string name="path_external_format">EXTERNAL: %1$s</string>
     <string name="btn_change_path">CHANGE PATH</string>
+    <string name="toast_storage_denied">STORAGE ACCESS DENIED</string>
     <string name="section_interface">INTERFACE</string>
     <string name="label_hud_theme">HUD THEME</string>
     <string name="theme_button_placeholder">MIKU (01 TEAL)</string>
@@ -53,11 +62,18 @@
     <string name="btn_scan_network">SCAN NETWORK</string>
     <string name="label_about">ABOUT GeoHUD</string>
     <string name="about_placeholder">VERSION: --\nBUILD: --\nDEV: DARKRED1145</string>
-    <string name="about_format">VERSION: %1$s\nBUILD: %2$s\nDEV: DARKRED1145</string>
+    <string name="about_format">VERSION: %1$s\nBUILD: %2$d\nDEV: DARKRED1145</string>
     <string name="about_unknown">VERSION: UNKNOWN</string>
     <string name="dialog_title_theme">SELECT INTERFACE SKIN</string>
     <string name="btn_cancel">CANCEL</string>
     <string name="toast_rebooting">REBOOTING INTERFACE...</string>
+
+    <!-- Theme names -->
+    <string name="theme_name_miku">MIKU (01 TEAL)</string>
+    <string name="theme_name_rem">REM (MAID BLUE)</string>
+    <string name="theme_name_luka">LUKA (V4 PINK)</string>
+    <string name="theme_name_rin">RIN/LEN (VOLTAGE)</string>
+    <string name="theme_name_material_you">SYSTEM (MATERIAL YOU)</string>
 
     <!-- Instructions dialog -->
     <string name="dialog_title_howto">How to Use GeoHUD</string>
@@ -78,6 +94,7 @@
     <string name="toast_download_failed">Download failed.</string>
     <string name="toast_download_error">Download failed: %1$s</string>
     <string name="toast_install_error">Install Error: %1$s</string>
+    <string name="toast_allow_install">Allow installs for GeoHUD, then retry the update.</string>
 
     <!-- Placeholder -->
     <string name="placeholder_date">DEC 06</string>

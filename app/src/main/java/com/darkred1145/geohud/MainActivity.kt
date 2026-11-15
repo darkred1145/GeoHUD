@@ -18,7 +18,10 @@ class MainActivity : AppCompatActivity() {
         ThemeHelper.applyTheme(this)
 
         super.onCreate(savedInstanceState)
+        enableHudEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        findViewById<ConstraintLayout>(R.id.root).applySystemBarPadding()
 
         // Bind Buttons
         val cameraCard = findViewById<ConstraintLayout>(R.id.cameraCard)

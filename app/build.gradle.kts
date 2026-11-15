@@ -34,8 +34,8 @@ android {
         applicationId = "com.darkred1145.geohud"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.6.1"
+        versionCode = 8
+        versionName = "0.6.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -88,7 +88,6 @@ dependencies {
     implementation("androidx.camera:camera-camera2:${cameraxVersion}")
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
-    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
     implementation("androidx.exifinterface:exifinterface:1.4.2")
     implementation("io.coil-kt:coil:2.7.0")
 

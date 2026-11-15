@@ -2,17 +2,18 @@ package com.darkred1145.geohud
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ContentValues
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.TextView
@@ -26,9 +27,9 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
-import androidx.exifinterface.media.ExifInterface
-import java.text.SimpleDateFormat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -41,8 +42,12 @@ class CameraActivity : AppCompatActivity(), LocationListener {
     private lateinit var locationManager: LocationManager
     private var flashMode = ImageCapture.FLASH_MODE_OFF
     private var usingFrontCamera = false
+    private var locationUpdatesActive = false
 
     // UI Elements
+    private lateinit var root: View
+    private lateinit var dataPanel: View
+    private lateinit var bottomBar: View
     private lateinit var viewFinder: PreviewView
     private lateinit var txtLocation: TextView
     private lateinit var txtStatus: TextView
@@ -67,12 +72,22 @@ class CameraActivity : AppCompatActivity(), LocationListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
+        enableHudEdgeToEdge()
         setContentView(R.layout.activity_camera)
 
         // Keep screen on for tactical usage
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        // Restore camera controls after rotation
+        if (savedInstanceState != null) {
+            flashMode = savedInstanceState.getInt(STATE_FLASH, ImageCapture.FLASH_MODE_OFF)
+            usingFrontCamera = savedInstanceState.getBoolean(STATE_FRONT_CAMERA, false)
+        }
+
         // Bind UI
+        root = findViewById(R.id.cameraRoot)
+        dataPanel = findViewById(R.id.dataPanel)
+        bottomBar = findViewById(R.id.bottomBar)
         viewFinder = findViewById(R.id.viewFinder)
         txtLocation = findViewById(R.id.txtLocation)
         txtStatus = findViewById(R.id.txtStatus)
@@ -84,7 +99,12 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         cameraExecutor = Executors.newSingleThreadExecutor()
 
+        // Keep HUD panels clear of the status/navigation bars.
+        applySystemBarInsets()
+        updateFlashIcon()
+
         // Button Logic
+        btnCapture.isEnabled = false
         btnCapture.setOnClickListener { takePhoto() }
         btnBack.setOnClickListener { finish() } // Return to Dashboard
         btnFlash.setOnClickListener { toggleFlash() }
@@ -92,11 +112,13 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             usingFrontCamera = !usingFrontCamera
             startCamera()
         }
+        txtStatus.setOnClickListener {
+            if (!isGpsEnabled() && !isNetworkEnabled()) openLocationSettings()
+        }
 
         // Permission Check
-        if (allPermissionsGranted()) {
+        if (hasCameraPermission() && hasLocationPermission() && hasStoragePermission()) {
             startCamera()
-            startLocationUpdates()
         } else {
             requestPermissionsLauncher.launch(requiredPermissions)
         }
@@ -104,88 +126,148 @@ class CameraActivity : AppCompatActivity(), LocationListener {
 
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions.all { it.value }) {
-            startCamera()
-            startLocationUpdates()
-        } else {
+    ) {
+        if (!hasCameraPermission()) {
             Toast.makeText(this, R.string.toast_permission_denied, Toast.LENGTH_LONG).show()
             finish()
+            return@registerForActivityResult
+        }
+        startCamera()
+        if (hasLocationPermission()) {
+            startLocationUpdates()
+        } else {
+            showNoLocationPermission()
         }
     }
 
+    private fun applySystemBarInsets() {
+        val initialTop = (dataPanel.layoutParams as ViewGroup.MarginLayoutParams).topMargin
+        val initialBottom = (bottomBar.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            dataPanel.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = initialTop + bars.top
+            }
+            bottomBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = initialBottom + bars.bottom
+            }
+            insets
+        }
+        ViewCompat.requestApplyInsets(root)
+    }
+
     private fun startCamera() {
+        imageCapture = null
+        btnCapture.isEnabled = false
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val cameraProvider = try {
+                cameraProviderFuture.get()
+            } catch (e: Exception) {
+                Log.e(TAG, "Camera provider failed", e)
+                showToast(R.string.toast_camera_failed)
+                return@addListener
+            }
 
-            val preview = Preview.Builder()
-                .build()
-                .also { it.surfaceProvider = viewFinder.surfaceProvider }
-
-            imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                .setFlashMode(flashMode)
-                .build()
-
-            // Select Camera
             val cameraSelector = if (usingFrontCamera) {
                 CameraSelector.DEFAULT_FRONT_CAMERA
             } else {
                 CameraSelector.DEFAULT_BACK_CAMERA
             }
 
+            val hasCamera = try {
+                cameraProvider.hasCamera(cameraSelector)
+            } catch (e: Exception) {
+                Log.e(TAG, "Camera availability check failed", e)
+                false
+            }
+
+            if (!hasCamera) {
+                if (usingFrontCamera) {
+                    usingFrontCamera = false
+                    showToast(R.string.toast_no_front_camera)
+                    startCamera()
+                } else {
+                    showToast(R.string.toast_camera_failed)
+                }
+                return@addListener
+            }
+
+            val preview = Preview.Builder()
+                .build()
+                .also { it.surfaceProvider = viewFinder.surfaceProvider }
+
+            val capture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                .setFlashMode(flashMode)
+                .build()
+
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
-            } catch (exc: Exception) {
-                Log.e("GeoHUD", "Camera binding failed", exc)
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, capture)
+                imageCapture = capture
+                btnCapture.isEnabled = true
+            } catch (e: Exception) {
+                Log.e(TAG, "Camera binding failed", e)
+                showToast(R.string.toast_camera_failed)
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
-    @SuppressLint("MissingPermission", "SetTextI18n")
+    @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-
-        if (!isGpsEnabled && !isNetworkEnabled) {
-            txtStatus.text = getString(R.string.status_no_signal)
-            txtStatus.setTextColor(Color.RED)
+        if (!hasLocationPermission()) {
+            showNoLocationPermission()
             return
         }
 
-        // 1. Request Updates (Hardware + Network)
-        if (isGpsEnabled) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 2f, this)
-        }
-        if (isNetworkEnabled) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000L, 2f, this)
-        }
+        val gpsEnabled = isGpsEnabled()
+        val networkEnabled = isNetworkEnabled()
+        val fineLocation = hasFineLocationPermission()
 
-        // 2. Initial Cache Check (The Compromise)
-        // We get the last known location to show SOMETHING immediately,
-        // but we will flag it as "Cached" or "Stale" in the UI.
-        val lastGps = if (isGpsEnabled) locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) else null
-        val lastNet = if (isNetworkEnabled) locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) else null
-
-        // Pick the freshest location from cache
-        var bestLocation: Location? = null
-        if (lastGps != null && lastNet != null) {
-            bestLocation = if (lastGps.time > lastNet.time) lastGps else lastNet
-        } else if (lastGps != null) {
-            bestLocation = lastGps
-        } else if (lastNet != null) {
-            bestLocation = lastNet
+        if ((!fineLocation || !gpsEnabled) && !networkEnabled) {
+            showNoSignal()
+            return
         }
 
-        if (bestLocation != null) {
-            // Update UI with the cached location immediately
-            updateLocationUI(bestLocation, isCached = true)
-        } else {
-            txtStatus.text = getString(R.string.status_scanning)
-            txtStatus.setTextColor("#D32F2F".toColorInt())
+        locationUpdatesActive = true
+        try {
+            if (gpsEnabled && fineLocation) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 2f, this)
+            }
+            if (networkEnabled) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000L, 2f, this)
+            }
+
+            // Show the freshest cached fix immediately while waiting for live data.
+            val lastGps = if (gpsEnabled && fineLocation) {
+                runCatching { locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) }.getOrNull()
+            } else {
+                null
+            }
+            val lastNetwork = if (networkEnabled) {
+                runCatching { locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) }.getOrNull()
+            } else {
+                null
+            }
+            val cached = listOfNotNull(lastGps, lastNetwork).maxByOrNull { it.time }
+
+            if (cached != null) {
+                updateLocationUI(cached, isCached = true)
+            } else if (currentLocation == null) {
+                txtStatus.text = getString(R.string.status_scanning)
+                txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_amber))
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Location permission lost", e)
+            locationManager.removeUpdates(this)
+            locationUpdatesActive = false
+            showNoLocationPermission()
+        } catch (e: Exception) {
+            Log.e(TAG, "Location updates failed", e)
+            locationManager.removeUpdates(this)
+            locationUpdatesActive = false
+            showNoSignal()
         }
     }
 
@@ -194,12 +276,11 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         updateLocationUI(location, isCached = false)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updateLocationUI(location: Location, isCached: Boolean) {
         currentLocation = location
 
-        val lat = "%.5f".format(location.latitude)
-        val lon = "%.5f".format(location.longitude)
+        val lat = String.format(Locale.US, "%.5f", location.latitude)
+        val lon = String.format(Locale.US, "%.5f", location.longitude)
 
         // 1. Handle Status Text & Color based on Data Quality
         if (isCached) {
@@ -209,10 +290,10 @@ class CameraActivity : AppCompatActivity(), LocationListener {
 
             if (isFresh) {
                 txtStatus.text = getString(R.string.status_locked_cached)
-                txtStatus.setTextColor(Color.YELLOW) // Warning: Not live, but usable
+                txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_amber))
             } else {
                 txtStatus.text = getString(R.string.status_last_known)
-                txtStatus.setTextColor(Color.RED) // Error: Data is old, wait for lock
+                txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_red))
             }
         } else {
             // Live Data
@@ -222,20 +303,49 @@ class CameraActivity : AppCompatActivity(), LocationListener {
                 getString(R.string.source_network)
             }
             txtStatus.text = getString(R.string.status_locked, source)
-            txtStatus.setTextColor("#00E676".toColorInt()) // Green: Good to go
+            txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_green))
         }
 
         // 2. Update Coordinate Display
-        if (location.hasAltitude()) {
-            val alt = "${location.altitude.roundToInt()}m"
-            txtLocation.text = getString(R.string.coords_3line, lat, lon, alt)
-        } else {
-            txtLocation.text = getString(R.string.coords_2line, lat, lon)
+        val alt = "${location.altitude.roundToInt()}m"
+        val accuracy = location.accuracy.roundToInt()
+        txtLocation.text = when {
+            location.hasAltitude() && location.hasAccuracy() ->
+                getString(R.string.coords_4line, lat, lon, alt, accuracy.toString())
+            location.hasAltitude() ->
+                getString(R.string.coords_3line, lat, lon, alt)
+            location.hasAccuracy() ->
+                getString(R.string.coords_3line_acc, lat, lon, accuracy.toString())
+            else ->
+                getString(R.string.coords_2line, lat, lon)
         }
     }
 
-    override fun onProviderEnabled(provider: String) {}
-    override fun onProviderDisabled(provider: String) {}
+    private fun showNoSignal() {
+        locationUpdatesActive = false
+        currentLocation = null
+        runCatching { locationManager.removeUpdates(this) }
+        txtStatus.text = getString(R.string.status_no_signal)
+        txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_red))
+        txtLocation.text = getString(R.string.coords_placeholder)
+    }
+
+    private fun showNoLocationPermission() {
+        locationUpdatesActive = false
+        currentLocation = null
+        runCatching { locationManager.removeUpdates(this) }
+        txtStatus.text = getString(R.string.status_no_location_permission)
+        txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_red))
+        txtLocation.text = getString(R.string.coords_placeholder)
+    }
+
+    override fun onProviderEnabled(provider: String) {
+        startLocationUpdates()
+    }
+
+    override fun onProviderDisabled(provider: String) {
+        startLocationUpdates()
+    }
 
     @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
@@ -247,78 +357,149 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             ImageCapture.FLASH_MODE_ON
         }
         imageCapture?.flashMode = flashMode
+        updateFlashIcon()
+    }
+
+    private fun updateFlashIcon() {
         btnFlash.setImageResource(
             if (flashMode == ImageCapture.FLASH_MODE_ON) R.drawable.ic_flash_on else R.drawable.ic_flash_off
         )
     }
 
     private fun takePhoto() {
-        val imageCapture = imageCapture ?: return
-
-        val name = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
-            .format(System.currentTimeMillis())
-
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, getString(R.string.photo_name_format, name))
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/GeoHUD")
-            }
+        val capture = imageCapture ?: return
+        val location = currentLocation?.let { Location(it) }
+        val name = PhotoStore.newPhotoName(this)
+        val temp = try {
+            PhotoStore.newTempFile(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Cannot create temp capture file", e)
+            showToast(R.string.toast_capture_failed)
+            return
         }
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-            contentResolver,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        ).build()
+        btnCapture.isEnabled = false
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(temp).build()
 
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e("GeoHUD", "Capture failed: ${exc.message}", exc)
-                }
+        try {
+            capture.takePicture(
+                outputOptions,
+                cameraExecutor,
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onError(exc: ImageCaptureException) {
+                        temp.delete()
+                        Log.e(TAG, "Capture failed", exc)
+                        runOnUiThread {
+                            btnCapture.isEnabled = true
+                            showToast(R.string.toast_capture_failed)
+                        }
+                    }
 
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = output.savedUri
+                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                        var tagged = false
+                        if (location != null) {
+                            try {
+                                PhotoStore.tag(temp, location)
+                                tagged = true
+                            } catch (e: Exception) {
+                                Log.e(TAG, "EXIF write failed", e)
+                            }
+                        }
 
-                    if (savedUri != null) {
-                        if (currentLocation != null) {
-                            writeGeoTag(savedUri, currentLocation!!)
-                            Toast.makeText(baseContext, R.string.toast_image_secured, Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(baseContext, R.string.toast_no_position, Toast.LENGTH_LONG).show()
+                        val savedUri: Uri? = try {
+                            PhotoStore.publish(applicationContext, temp, name)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Saving capture failed", e)
+                            temp.delete()
+                            null
+                        }
+
+                        runOnUiThread {
+                            btnCapture.isEnabled = true
+                            when {
+                                savedUri == null -> showToast(R.string.toast_capture_failed)
+                                tagged -> showToast(R.string.toast_image_secured)
+                                location == null -> showToast(R.string.toast_no_position)
+                                else -> showToast(R.string.toast_exif_failed)
+                            }
                         }
                     }
                 }
-            }
-        )
-    }
-
-    private fun writeGeoTag(photoUri: Uri, location: Location) {
-        try {
-            contentResolver.openFileDescriptor(photoUri, "rw")?.use { pfd ->
-                val exif = ExifInterface(pfd.fileDescriptor)
-                exif.setLatLong(location.latitude, location.longitude)
-                if(location.hasAltitude()) {
-                    exif.setAltitude(location.altitude)
-                }
-                exif.saveAttributes()
-                Log.d("GeoHUD", "EXIF Data Injected")
-            }
+            )
         } catch (e: Exception) {
-            Log.e("GeoHUD", "EXIF Write Failed", e)
+            temp.delete()
+            btnCapture.isEnabled = true
+            Log.e(TAG, "Cannot start capture", e)
+            showToast(R.string.toast_capture_failed)
         }
     }
 
-    private fun allPermissionsGranted() = requiredPermissions.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    private fun hasPermission(permission: String): Boolean =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+
+    private fun hasCameraPermission(): Boolean = hasPermission(Manifest.permission.CAMERA)
+
+    private fun hasFineLocationPermission(): Boolean =
+        hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    private fun hasLocationPermission(): Boolean =
+        hasFineLocationPermission() ||
+                hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    private fun hasStoragePermission(): Boolean =
+        Build.VERSION.SDK_INT > Build.VERSION_CODES.P ||
+                hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+    private fun isGpsEnabled(): Boolean =
+        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+    private fun isNetworkEnabled(): Boolean =
+        locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+    private fun openLocationSettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+        } catch (e: Exception) {
+            Log.e(TAG, "Cannot open location settings", e)
+        }
+    }
+
+    private fun showToast(messageRes: Int) {
+        Toast.makeText(applicationContext, messageRes, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (hasCameraPermission() && hasLocationPermission()) {
+            startLocationUpdates()
+        } else if (hasCameraPermission()) {
+            showNoLocationPermission()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (locationUpdatesActive) {
+            runCatching { locationManager.removeUpdates(this) }
+            locationUpdatesActive = false
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(STATE_FLASH, flashMode)
+        outState.putBoolean(STATE_FRONT_CAMERA, usingFrontCamera)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        locationManager.removeUpdates(this)
+        runCatching { locationManager.removeUpdates(this) }
         cameraExecutor.shutdown()
+    }
+
+    private companion object {
+        const val TAG = "GeoHUD"
+        const val STATE_FLASH = "flash_mode"
+        const val STATE_FRONT_CAMERA = "using_front_camera"
     }
 }

@@ -18,6 +18,8 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
@@ -28,10 +30,16 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnCheckUpdate: Button
     private lateinit var txtVersion: TextView
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
+        enableHudEdgeToEdge()
         setContentView(R.layout.activity_settings)
+
+        val root = findViewById<android.view.View>(R.id.root)
+        root.applySystemBarPadding()
 
         // Bind Views
         txtCurrentPath = findViewById(R.id.txtCurrentPath)
@@ -43,7 +51,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // Initialize UI
         val currentCode = ThemeHelper.getCurrentTheme(this)
-        btnChangeTheme.text = ThemeHelper.getThemeName(currentCode)
+        btnChangeTheme.text = ThemeHelper.getThemeName(this, currentCode)
 
         loadPreferences()
         updateVersionInfo()
@@ -53,33 +61,68 @@ class SettingsActivity : AppCompatActivity() {
         // Logic
         val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
             if (uri != null) {
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                contentResolver.takePersistableUriPermission(uri, takeFlags)
-                savePathPreference(uri)
-                updatePathUI(uri)
+                if (persistTreePermission(uri)) {
+                    savePathPreference(uri)
+                    updatePathUI(uri)
+                } else {
+                    Toast.makeText(this, R.string.toast_storage_denied, Toast.LENGTH_LONG).show()
+                }
             }
         }
 
         btnChangeDir.setOnClickListener { directoryLauncher.launch(null) }
         btnChangeTheme.setOnClickListener { showThemeSelector() }
         btnCheckUpdate.setOnClickListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                UpdateChecker.checkForUpdates(this@SettingsActivity)
+            btnCheckUpdate.isEnabled = false
+            scope.launch {
+                try {
+                    UpdateChecker.checkForUpdates(this@SettingsActivity)
+                } finally {
+                    btnCheckUpdate.isEnabled = true
+                }
             }
         }
     }
 
+    /**
+     * Providers are allowed to grant read-only access. Persist whatever is
+     * available instead of crashing on the write flag.
+     */
+    private fun persistTreePermission(uri: Uri): Boolean {
+        val readWrite = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        val persisted = try {
+            contentResolver.takePersistableUriPermission(uri, readWrite)
+            true
+        } catch (e: SecurityException) {
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                true
+            } catch (e: SecurityException) {
+                false
+            }
+        }
+        if (!persisted) return false
+
+        // A read-only tree cannot receive captures. Reject it up front.
+        return contentResolver.persistedUriPermissions.any {
+            it.uri == uri && it.isWritePermission
+        }
+    }
+
     private fun savePathPreference(uri: Uri) {
-        val sharedPref = getSharedPreferences("GeoHUDPrefs", MODE_PRIVATE)
+        val sharedPref = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
         sharedPref.edit {
-            putString("save_directory", uri.toString())
+            putString(Prefs.KEY_SAVE_DIR, uri.toString())
         }
     }
 
     private fun loadPreferences() {
-        val sharedPref = getSharedPreferences("GeoHUDPrefs", MODE_PRIVATE)
-        val savedUriString = sharedPref.getString("save_directory", null)
+        val sharedPref = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+        val savedUriString = sharedPref.getString(Prefs.KEY_SAVE_DIR, null)
         if (savedUriString != null) {
             updatePathUI(savedUriString.toUri())
         } else {
@@ -88,9 +131,13 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updatePathUI(uri: Uri) {
-        val documentFile = DocumentFile.fromTreeUri(this, uri)
-        val name = documentFile?.name ?: uri.path
-        txtCurrentPath.text = getString(R.string.path_external_format, name)
+        try {
+            val documentFile = DocumentFile.fromTreeUri(this, uri)
+            val name = documentFile?.name ?: uri.path
+            txtCurrentPath.text = getString(R.string.path_external_format, name)
+        } catch (e: Exception) {
+            txtCurrentPath.text = getString(R.string.default_path)
+        }
     }
 
     private fun updateVersionInfo() {
@@ -116,7 +163,7 @@ class SettingsActivity : AppCompatActivity() {
             themeCodes.add(ThemeHelper.THEME_MATERIAL_YOU)
         }
 
-        val themeNames = themeCodes.map { ThemeHelper.getThemeName(it) }
+        val themeNames = themeCodes.map { ThemeHelper.getThemeName(this, it) }
 
         val currentCode = ThemeHelper.getCurrentTheme(this)
         val checkedItem = themeCodes.indexOf(currentCode).coerceAtLeast(0)
@@ -141,5 +188,10 @@ class SettingsActivity : AppCompatActivity() {
         finish()
         @Suppress("DEPRECATION")
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
     }
 }
