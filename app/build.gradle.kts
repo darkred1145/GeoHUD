@@ -95,7 +95,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.2.0")
 
     // Network & Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
 }
