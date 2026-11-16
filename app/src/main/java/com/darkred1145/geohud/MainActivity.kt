@@ -3,7 +3,7 @@ package com.darkred1145.geohud
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableHudEdgeToEdge()
         setContentView(R.layout.activity_main)
+        applyPanelStyle()
 
         findViewById<ConstraintLayout>(R.id.root).applySystemBarPadding()
 
@@ -54,10 +55,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showInstructionsDialog() {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle(R.string.dialog_title_howto)
             .setMessage(R.string.dialog_body_howto)
             .setPositiveButton(R.string.btn_got_it, null)
             .show()
     }
 }
+

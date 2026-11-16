@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon layer: alpha mask only, system tints it. Same silhouette as the foreground. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M22,44 V26 A4,4 0 0 1 26,22 H44"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="7" />
+    <path
+        android:pathData="M64,22 H82 A4,4 0 0 1 86,26 V44"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="7" />
+    <path
+        android:pathData="M86,64 V82 A4,4 0 0 1 82,86 H64"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="7" />
+    <path
+        android:pathData="M44,86 H26 A4,4 0 0 1 22,82 V64"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="7" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M49,45 H59 A4,4 0 0 1 63,49 V59 A4,4 0 0 1 59,63 H49 A4,4 0 0 1 45,59 V49 A4,4 0 0 1 49,45 Z" />
+</vector>

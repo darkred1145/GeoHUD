@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -19,6 +20,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -51,6 +53,8 @@ class CameraActivity : AppCompatActivity(), LocationListener {
     private lateinit var viewFinder: PreviewView
     private lateinit var txtLocation: TextView
     private lateinit var txtStatus: TextView
+    private lateinit var txtMeta: TextView
+    private lateinit var statusDot: View
     private lateinit var btnCapture: ImageButton
     private lateinit var btnFlash: ImageButton
     private lateinit var btnSwap: ImageButton
@@ -74,6 +78,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         super.onCreate(savedInstanceState)
         enableHudEdgeToEdge()
         setContentView(R.layout.activity_camera)
+        applyPanelStyle()
 
         // Keep screen on for tactical usage
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -91,6 +96,8 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         viewFinder = findViewById(R.id.viewFinder)
         txtLocation = findViewById(R.id.txtLocation)
         txtStatus = findViewById(R.id.txtStatus)
+        txtMeta = findViewById(R.id.txtMeta)
+        statusDot = findViewById(R.id.statusDot)
         btnCapture = findViewById(R.id.btnCapture)
         btnFlash = findViewById(R.id.btnFlash)
         btnSwap = findViewById(R.id.btnSwap)
@@ -255,8 +262,8 @@ class CameraActivity : AppCompatActivity(), LocationListener {
             if (cached != null) {
                 updateLocationUI(cached, isCached = true)
             } else if (currentLocation == null) {
-                txtStatus.text = getString(R.string.status_scanning)
-                txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_amber))
+                setStatus(getString(R.string.status_scanning), R.color.hud_text_muted)
+                txtMeta.text = ""
             }
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission lost", e)
@@ -282,61 +289,58 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         val lat = String.format(Locale.US, "%.5f", location.latitude)
         val lon = String.format(Locale.US, "%.5f", location.longitude)
 
-        // 1. Handle Status Text & Color based on Data Quality
-        if (isCached) {
-            // Calculate how old this data is
-            val ageInMillis = System.currentTimeMillis() - location.time
-            val isFresh = ageInMillis < 120 * 1000 // Considered "Fresh" if less than 2 minutes old
+        // Status dot encodes fix quality; the label stays neutral so the card reads calmly.
+        val meta = mutableListOf<String>()
+        if (location.hasAltitude()) {
+            meta += getString(R.string.meta_alt, "${location.altitude.roundToInt()}m")
+        }
+        if (location.hasAccuracy()) {
+            meta += getString(R.string.meta_acc, location.accuracy.roundToInt().toString())
+        }
 
+        if (isCached) {
+            val isFresh = System.currentTimeMillis() - location.time < CACHED_FRESH_MS
             if (isFresh) {
-                txtStatus.text = getString(R.string.status_locked_cached)
-                txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_amber))
+                setStatus(getString(R.string.status_locked_cached), R.color.tactical_amber)
             } else {
-                txtStatus.text = getString(R.string.status_last_known)
-                txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_red))
+                setStatus(getString(R.string.status_last_known), R.color.tactical_red)
             }
         } else {
-            // Live Data
             val source = if (location.provider == LocationManager.GPS_PROVIDER) {
                 getString(R.string.source_gps)
             } else {
                 getString(R.string.source_network)
             }
-            txtStatus.text = getString(R.string.status_locked, source)
-            txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_green))
+            meta += source
+            setStatus(getString(R.string.status_locked, source), R.color.tactical_green)
         }
 
-        // 2. Update Coordinate Display
-        val alt = "${location.altitude.roundToInt()}m"
-        val accuracy = location.accuracy.roundToInt()
-        txtLocation.text = when {
-            location.hasAltitude() && location.hasAccuracy() ->
-                getString(R.string.coords_4line, lat, lon, alt, accuracy.toString())
-            location.hasAltitude() ->
-                getString(R.string.coords_3line, lat, lon, alt)
-            location.hasAccuracy() ->
-                getString(R.string.coords_3line_acc, lat, lon, accuracy.toString())
-            else ->
-                getString(R.string.coords_2line, lat, lon)
-        }
+        txtLocation.text = getString(R.string.coords_2line, lat, lon)
+        txtMeta.text = meta.joinToString(" · ")
+    }
+
+    private fun setStatus(text: CharSequence, @ColorRes dotColorRes: Int) {
+        txtStatus.text = text
+        statusDot.backgroundTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this, dotColorRes))
     }
 
     private fun showNoSignal() {
         locationUpdatesActive = false
         currentLocation = null
         runCatching { locationManager.removeUpdates(this) }
-        txtStatus.text = getString(R.string.status_no_signal)
-        txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_red))
+        setStatus(getString(R.string.status_no_signal), R.color.tactical_red)
         txtLocation.text = getString(R.string.coords_placeholder)
+        txtMeta.text = ""
     }
 
     private fun showNoLocationPermission() {
         locationUpdatesActive = false
         currentLocation = null
         runCatching { locationManager.removeUpdates(this) }
-        txtStatus.text = getString(R.string.status_no_location_permission)
-        txtStatus.setTextColor(ContextCompat.getColor(this, R.color.tactical_red))
+        setStatus(getString(R.string.status_no_location_permission), R.color.tactical_red)
         txtLocation.text = getString(R.string.coords_placeholder)
+        txtMeta.text = ""
     }
 
     override fun onProviderEnabled(provider: String) {
@@ -501,5 +505,7 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         const val TAG = "GeoHUD"
         const val STATE_FLASH = "flash_mode"
         const val STATE_FRONT_CAMERA = "using_front_camera"
+        const val CACHED_FRESH_MS = 120 * 1000L
     }
 }
+

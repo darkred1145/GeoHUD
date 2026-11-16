@@ -11,16 +11,31 @@
         <item name="colorError">@color/tactical_red</item>
         <item name="colorOnError">@color/white</item>
 
-        <item name="android:statusBarColor">#051413</item>
-        <item name="android:windowBackground">#051413</item>
-        <item name="android:navigationBarColor">#051413</item>
+        <item name="android:statusBarColor">#0B0F12</item>
+        <item name="android:windowBackground">#0B0F12</item>
+        <item name="android:navigationBarColor">#0B0F12</item>
         <item name="android:windowLightStatusBar">false</item>
 
-        <item name="colorSurface">#0A2120</item>
-        <item name="colorOnSurface">#E0F2F1</item>
+        <item name="colorSurface">#0B0F12</item>
+        <item name="colorOnSurface">#F2F6F8</item>
 
         <item name="panelBackgroundColor">@color/panel_bg</item>
         <item name="borderColor">@color/border_color</item>
+        <item name="buttonBackgroundColor">#202B36</item>
+        <item name="buttonBorderColor">#4DFFFFFF</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.GeoHUD.Dialog</item>
+    </style>
+
+    <style name="ThemeOverlay.GeoHUD.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">#10161A</item>
+        <item name="colorSurfaceContainerHigh">#10161A</item>
+        <item name="colorOnSurface">#F2F6F8</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.GeoHUD.Dialog</item>
+    </style>
+
+    <style name="ShapeAppearance.GeoHUD.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
     </style>
 
     <style name="Theme.GeoHUD.Rem" parent="Theme.GeoHUD">
@@ -30,13 +45,15 @@
         <item name="colorSecondary">#F48FB1</item>
         <item name="colorOnSecondary">#000000</item>
 
-        <item name="android:windowBackground">#0B101A</item>
-        <item name="colorSurface">#131A29</item>
-        <item name="android:statusBarColor">#0B101A</item>
-        <item name="android:navigationBarColor">#0B101A</item>
+        <item name="android:windowBackground">#0A0F16</item>
+        <item name="colorSurface">#0E1520</item>
+        <item name="android:statusBarColor">#0A0F16</item>
+        <item name="android:navigationBarColor">#0A0F16</item>
 
-        <item name="panelBackgroundColor">#CC131A29</item>
-        <item name="borderColor">#335D9CEC</item>
+        <item name="panelBackgroundColor">#1A2431</item>
+        <item name="borderColor">#4D5D9CEC</item>
+        <item name="buttonBackgroundColor">#223043</item>
+        <item name="buttonBorderColor">#665D9CEC</item>
     </style>
 
     <style name="Theme.GeoHUD.Luka" parent="Theme.GeoHUD">
@@ -46,13 +63,15 @@
         <item name="colorSecondary">#FFD700</item>
         <item name="colorOnSecondary">#000000</item>
 
-        <item name="android:windowBackground">#1A0B10</item>
-        <item name="colorSurface">#2B121A</item>
-        <item name="android:statusBarColor">#1A0B10</item>
-        <item name="android:navigationBarColor">#1A0B10</item>
+        <item name="android:windowBackground">#150A0F</item>
+        <item name="colorSurface">#1C0D13</item>
+        <item name="android:statusBarColor">#150A0F</item>
+        <item name="android:navigationBarColor">#150A0F</item>
 
-        <item name="panelBackgroundColor">#CC2B121A</item>
-        <item name="borderColor">#33FF80AB</item>
+        <item name="panelBackgroundColor">#2C151E</item>
+        <item name="borderColor">#4DFF80AB</item>
+        <item name="buttonBackgroundColor">#3A1B27</item>
+        <item name="buttonBorderColor">#66FF80AB</item>
     </style>
 
     <style name="Theme.GeoHUD.Rin" parent="Theme.GeoHUD">
@@ -62,19 +81,22 @@
         <item name="colorSecondary">#FFFFFF</item>
         <item name="colorOnSecondary">#000000</item>
 
-        <item name="android:windowBackground">#141400</item>
-        <item name="colorSurface">#262600</item>
-        <item name="android:statusBarColor">#141400</item>
-        <item name="android:navigationBarColor">#141400</item>
+        <item name="android:windowBackground">#121200</item>
+        <item name="colorSurface">#171700</item>
+        <item name="android:statusBarColor">#121200</item>
+        <item name="android:navigationBarColor">#121200</item>
 
-        <item name="panelBackgroundColor">#CC262600</item>
-        <item name="borderColor">#33FFD600</item>
+        <item name="panelBackgroundColor">#262600</item>
+        <item name="borderColor">#4DFFD600</item>
+        <item name="buttonBackgroundColor">#333300</item>
+        <item name="buttonBorderColor">#66FFD600</item>
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#051413</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="windowSplashScreenBackground">#0B0F12</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="postSplashScreenTheme">@style/Theme.GeoHUD</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
+

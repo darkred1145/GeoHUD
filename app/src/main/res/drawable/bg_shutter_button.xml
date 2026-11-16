@@ -3,27 +3,20 @@
 
     <item android:state_pressed="true">
         <layer-list>
-            <item android:width="72dp" android:height="72dp" android:gravity="center">
+            <item
+                android:width="76dp"
+                android:height="76dp"
+                android:gravity="center">
                 <shape android:shape="oval">
-                    <stroke android:width="3dp" android:color="#CCFFFFFF" />
+                    <stroke
+                        android:width="2dp"
+                        android:color="#B3FFFFFF" />
                 </shape>
             </item>
-            <item android:width="56dp" android:height="56dp" android:gravity="center">
-                <shape android:shape="oval">
-                    <solid android:color="#CCFFFFFF" />
-                </shape>
-            </item>
-        </layer-list>
-    </item>
-
-    <item>
-        <layer-list>
-            <item android:width="72dp" android:height="72dp" android:gravity="center">
-                <shape android:shape="oval">
-                    <stroke android:width="3dp" android:color="#FFFFFF" />
-                </shape>
-            </item>
-            <item android:width="56dp" android:height="56dp" android:gravity="center">
+            <item
+                android:width="58dp"
+                android:height="58dp"
+                android:gravity="center">
                 <shape android:shape="oval">
                     <solid android:color="?attr/colorPrimary" />
                 </shape>
@@ -31,4 +24,26 @@
         </layer-list>
     </item>
 
+    <item>
+        <layer-list>
+            <item
+                android:width="76dp"
+                android:height="76dp"
+                android:gravity="center">
+                <shape android:shape="oval">
+                    <stroke
+                        android:width="2dp"
+                        android:color="#F2FFFFFF" />
+                </shape>
+            </item>
+            <item
+                android:width="58dp"
+                android:height="58dp"
+                android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="?attr/colorPrimary" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
 </selector>

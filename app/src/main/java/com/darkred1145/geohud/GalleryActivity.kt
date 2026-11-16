@@ -12,6 +12,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -34,7 +35,7 @@ class GalleryActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyStateLayout: View
-    private lateinit var txtEmpty: View
+    private lateinit var txtCount: TextView
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var loadJob: Job? = null
@@ -50,13 +51,14 @@ class GalleryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableHudEdgeToEdge()
         setContentView(R.layout.activity_gallery)
+        applyPanelStyle()
 
         val root = findViewById<View>(R.id.root)
         root.applySystemBarPadding()
 
         recyclerView = findViewById(R.id.recyclerView)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
-        txtEmpty = findViewById(R.id.txtEmpty)
+        txtCount = findViewById(R.id.txtCount)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 
         btnBack.setOnClickListener { finish() }
@@ -174,9 +176,9 @@ class GalleryActivity : AppCompatActivity() {
 
     private fun render(items: List<GalleryItem>) {
         val empty = items.isEmpty()
+        txtCount.text = getString(R.string.count_captures, items.size)
         emptyStateLayout.visibility = if (empty) View.VISIBLE else View.GONE
         recyclerView.visibility = if (empty) View.GONE else View.VISIBLE
-        txtEmpty.visibility = if (empty) View.VISIBLE else View.GONE
 
         if (!empty) {
             recyclerView.adapter = GalleryAdapter(items) { item ->
@@ -218,3 +220,4 @@ class GalleryActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
+

@@ -12,26 +12,30 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_tactical_panel"
-        android:padding="16dp"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_icon_circle"
             android:contentDescription="@string/cd_back"
-            android:src="@android:drawable/ic_menu_revert"
+            android:padding="10dp"
+            android:src="@drawable/ic_arrow_back"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="?attr/colorOnSurface" />
 
         <LinearLayout
+            android:id="@+id/headerTitles"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="12dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -42,22 +46,33 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
-                android:letterSpacing="0.1"
+                android:letterSpacing="0.08"
                 android:text="@string/title_archive"
                 android:textColor="?attr/colorPrimary"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/txtCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:fontFamily="sans-serif-condensed"
-                android:letterSpacing="0.15"
+                android:layout_marginTop="2dp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.12"
                 android:text="@string/subtitle_archive"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="@color/hud_text_muted"
                 android:textSize="11sp" />
         </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/hud_hairline"
+            android:importantForAccessibility="no"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/headerTitles" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -66,7 +81,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:paddingHorizontal="6dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="12dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header"
@@ -76,7 +93,6 @@
         android:id="@+id/emptyStateLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0.5"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
@@ -87,23 +103,23 @@
         tools:visibility="visible">
 
         <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="14dp"
+            android:alpha="0.5"
             android:contentDescription="@null"
-            android:src="@android:drawable/ic_menu_gallery"
-            app:tint="?attr/colorOnSurface" />
+            android:src="@drawable/ic_gallery_outline"
+            app:tint="?attr/colorPrimary" />
 
         <TextView
             android:id="@+id/txtEmpty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
-            android:letterSpacing="0.1"
+            android:letterSpacing="0.12"
             android:text="@string/empty_gallery"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textColor="@color/hud_text_muted"
+            android:textSize="13sp" />
 
     </LinearLayout>
 

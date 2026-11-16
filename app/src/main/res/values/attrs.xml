@@ -1,4 +1,6 @@
 <resources>
     <attr name="panelBackgroundColor" format="color" />
     <attr name="borderColor" format="color" />
+    <attr name="buttonBackgroundColor" format="color" />
+    <attr name="buttonBorderColor" format="color" />
 </resources>

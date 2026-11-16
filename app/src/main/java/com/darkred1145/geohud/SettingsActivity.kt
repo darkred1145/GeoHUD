@@ -4,7 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -16,6 +16,8 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.slider.Slider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,9 +27,10 @@ import kotlinx.coroutines.launch
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var txtCurrentPath: TextView
-    private lateinit var btnChangeDir: Button
-    private lateinit var btnChangeTheme: Button
-    private lateinit var btnCheckUpdate: Button
+    private lateinit var txtThemeValue: TextView
+    private lateinit var cardDirectory: View
+    private lateinit var cardTheme: View
+    private lateinit var cardUpdates: View
     private lateinit var txtVersion: TextView
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -37,26 +40,49 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableHudEdgeToEdge()
         setContentView(R.layout.activity_settings)
+        applyPanelStyle()
 
         val root = findViewById<android.view.View>(R.id.root)
         root.applySystemBarPadding()
 
         // Bind Views
         txtCurrentPath = findViewById(R.id.txtCurrentPath)
-        btnChangeDir = findViewById(R.id.btnChangeDir)
-        btnChangeTheme = findViewById(R.id.btnChangeTheme)
-        btnCheckUpdate = findViewById(R.id.btnCheckUpdate)
+        txtThemeValue = findViewById(R.id.txtThemeValue)
+        cardDirectory = findViewById(R.id.cardDirectory)
+        cardTheme = findViewById(R.id.cardTheme)
+        cardUpdates = findViewById(R.id.cardUpdates)
         txtVersion = findViewById(R.id.txtVersion)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 
         // Initialize UI
-        val currentCode = ThemeHelper.getCurrentTheme(this)
-        btnChangeTheme.text = ThemeHelper.getThemeName(this, currentCode)
+        txtThemeValue.text = ThemeHelper.getThemeName(this, ThemeHelper.getCurrentTheme(this))
 
         loadPreferences()
         updateVersionInfo()
 
         btnBack.setOnClickListener { finish() }
+
+        val txtOpacityValue = findViewById<TextView>(R.id.txtOpacityValue)
+        val switchRoundEnds = findViewById<MaterialSwitch>(R.id.switchRoundEnds)
+        val prefs = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+        val savedOpacity = prefs.getInt(Prefs.KEY_PANEL_OPACITY, Prefs.PANEL_OPACITY_DEFAULT)
+            .coerceIn(0, 100) / 5 * 5
+        txtOpacityValue.text = getString(R.string.opacity_value, savedOpacity)
+        switchRoundEnds.isChecked = prefs.getBoolean(Prefs.KEY_ROUND_ENDS, false)
+
+        val slider = findViewById<Slider>(R.id.sliderOpacity)
+        slider.value = savedOpacity.toFloat()
+        slider.addOnChangeListener { _, value, fromUser ->
+            if (!fromUser) return@addOnChangeListener
+            val percent = value.toInt()
+            txtOpacityValue.text = getString(R.string.opacity_value, percent)
+            prefs.edit { putInt(Prefs.KEY_PANEL_OPACITY, percent) }
+            applyPanelStyleTo(findViewById(R.id.root), percent, switchRoundEnds.isChecked)
+        }
+        switchRoundEnds.setOnCheckedChangeListener { _, checked ->
+            prefs.edit { putBoolean(Prefs.KEY_ROUND_ENDS, checked) }
+            applyPanelStyleTo(findViewById(R.id.root), slider.value.toInt(), checked)
+        }
 
         // Logic
         val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -70,15 +96,17 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        btnChangeDir.setOnClickListener { directoryLauncher.launch(null) }
-        btnChangeTheme.setOnClickListener { showThemeSelector() }
-        btnCheckUpdate.setOnClickListener {
-            btnCheckUpdate.isEnabled = false
+        cardDirectory.setOnClickListener { directoryLauncher.launch(null) }
+        cardTheme.setOnClickListener { showThemeSelector() }
+        cardUpdates.setOnClickListener {
+            cardUpdates.isEnabled = false
+            cardUpdates.alpha = 0.5f
             scope.launch {
                 try {
                     UpdateChecker.checkForUpdates(this@SettingsActivity)
                 } finally {
-                    btnCheckUpdate.isEnabled = true
+                    cardUpdates.isEnabled = true
+                    cardUpdates.alpha = 1f
                 }
             }
         }
@@ -195,3 +223,4 @@ class SettingsActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
+

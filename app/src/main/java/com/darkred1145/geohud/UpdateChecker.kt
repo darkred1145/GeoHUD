@@ -12,7 +12,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
@@ -106,7 +106,7 @@ object UpdateChecker {
     private fun showUpdateDialog(context: Context, release: GitHubRelease, localVer: String) {
         if (context is Activity && (context.isFinishing || context.isDestroyed)) return
 
-        AlertDialog.Builder(context)
+        MaterialAlertDialogBuilder(context)
             .setTitle(R.string.dialog_title_update)
             .setMessage(context.getString(R.string.dialog_body_update, release.tagName, localVer))
             .setPositiveButton(R.string.btn_update) { _, _ ->
