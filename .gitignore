@@ -45,3 +45,6 @@ captures/
 google-services.json
 # Temporary lock files
 .~lock.*#
+
+# Kotlin compiler session files
+.kotlin/

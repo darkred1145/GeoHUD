@@ -205,6 +205,11 @@ class GalleryActivity : AppCompatActivity() {
             Intent(this, ViewerActivity::class.java)
                 .setData(uri)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                .apply {
+                    if (item is GalleryItem.Local) {
+                        putExtra(ViewerActivity.EXTRA_LOCAL_PATH, item.file.absolutePath)
+                    }
+                }
         )
     }
 

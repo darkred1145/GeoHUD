@@ -11,12 +11,21 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -248,6 +257,17 @@ object UpdateChecker {
             )
             .setMimeType("application/vnd.android.package-archive")
 
+        val pollScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        var progressDialog: AlertDialog? = null
+        var waveView: WaveProgressView? = null
+        var percentView: TextView? = null
+
+        fun closeProgress() {
+            progressDialog?.dismiss()
+            progressDialog = null
+            pollScope.cancel()
+        }
+
         var expectedId = -1L
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctxt: Context, intent: Intent) {
@@ -258,6 +278,7 @@ object UpdateChecker {
                     appContext.unregisterReceiver(this)
                 } catch (_: Exception) {
                 }
+                closeProgress()
 
                 val status = try {
                     dm.query(DownloadManager.Query().setFilterById(id))?.use { cursor ->
@@ -302,6 +323,30 @@ object UpdateChecker {
             }
         }
 
+        if (context is Activity && !context.isFinishing && !context.isDestroyed) {
+            val view = LayoutInflater.from(context)
+                .inflate(R.layout.dialog_download_progress, null)
+            waveView = view.findViewById(R.id.waveProgress)
+            percentView = view.findViewById(R.id.txtDownloadPercent)
+            view.findViewById<TextView>(R.id.txtDownloadVersion).text =
+                context.getString(R.string.download_version, version)
+
+            progressDialog = MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.dialog_title_download)
+                .setView(view)
+                .setCancelable(false)
+                .setNegativeButton(R.string.btn_cancel) { _, _ ->
+                    if (expectedId != -1L) dm.remove(expectedId)
+                    try {
+                        appContext.unregisterReceiver(receiver)
+                    } catch (_: Exception) {
+                    }
+                    closeProgress()
+                }
+                .create()
+                .also { it.show() }
+        }
+
         try {
             // Register before enqueue so a fast download cannot outrun the receiver.
             ContextCompat.registerReceiver(
@@ -312,7 +357,26 @@ object UpdateChecker {
             )
             expectedId = dm.enqueue(request)
             Toast.makeText(context, R.string.toast_download_started, Toast.LENGTH_SHORT).show()
+
+            val wave = waveView
+            val percent = percentView
+            if (wave != null && percent != null) {
+                pollScope.launch {
+                    while (isActive) {
+                        val (downloaded, total) = queryDownloadProgress(dm, expectedId)
+                        if (total > 0L) {
+                            wave.progress = downloaded.toFloat() / total
+                            percent.text = appContext.getString(
+                                R.string.download_progress,
+                                (downloaded * 100 / total).toInt()
+                            )
+                        }
+                        delay(250L)
+                    }
+                }
+            }
         } catch (e: Exception) {
+            closeProgress()
             try {
                 appContext.unregisterReceiver(receiver)
             } catch (_: Exception) {
@@ -322,6 +386,26 @@ object UpdateChecker {
                 context.getString(R.string.toast_download_error, e.message),
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+    private fun queryDownloadProgress(dm: DownloadManager, id: Long): Pair<Long, Long> {
+        return try {
+            dm.query(DownloadManager.Query().setFilterById(id))?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val downloaded = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                    )
+                    val total = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                    )
+                    downloaded to total
+                } else {
+                    0L to 0L
+                }
+            } ?: (0L to 0L)
+        } catch (e: Exception) {
+            0L to 0L
         }
     }
 

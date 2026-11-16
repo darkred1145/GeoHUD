@@ -32,8 +32,8 @@ android {
         applicationId = "com.darkred1145.geohud"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "0.6.5"
+        versionCode = 12
+        versionName = "0.6.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -92,6 +92,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
 }
+
 
 
 

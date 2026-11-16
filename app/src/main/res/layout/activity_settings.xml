@@ -154,6 +154,76 @@
                 android:layout_marginBottom="10dp"
                 android:fontFamily="monospace"
                 android:letterSpacing="0.16"
+                android:text="@string/section_capture"
+                android:textColor="@color/hud_text_muted"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardStamp"
+                android:tag="hud_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_tactical_panel"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/iconStamp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_camera_lens"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.04"
+                    android:text="@string/label_stamp_location"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toBottomOf="@id/iconStamp"
+                    app:layout_constraintEnd_toStartOf="@id/switchStamp"
+                    app:layout_constraintStart_toEndOf="@id/iconStamp"
+                    app:layout_constraintTop_toTopOf="@id/iconStamp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchStamp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/label_stamp_location"
+                    app:layout_constraintBottom_toBottomOf="@id/iconStamp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/iconStamp"
+                    app:thumbTint="?attr/colorOnSurface" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="monospace"
+                    android:text="@string/sub_stamp_location"
+                    android:textColor="@color/hud_text_muted"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/iconStamp" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.16"
                 android:text="@string/section_interface"
                 android:textColor="@color/hud_text_muted"
                 android:textSize="11sp"

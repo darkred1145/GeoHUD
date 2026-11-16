@@ -57,6 +57,9 @@
     <string name="path_external_format">%1$s</string>
     <string name="btn_change_path">CHANGE FOLDER</string>
     <string name="toast_storage_denied">STORAGE ACCESS DENIED</string>
+    <string name="section_capture">CAPTURE</string>
+    <string name="label_stamp_location">STAMP COORDINATES</string>
+    <string name="sub_stamp_location">BURN GPS + TIME INTO THE IMAGE</string>
     <string name="section_interface">APPEARANCE</string>
     <string name="label_hud_theme">THEME</string>
     <string name="label_panel_opacity">PANEL OPACITY</string>
@@ -90,6 +93,17 @@
 
     <!-- Image viewer -->
     <string name="cd_close_viewer">Close image</string>
+    <string name="cd_options">Capture options</string>
+    <string name="dialog_title_capture">CAPTURE OPTIONS</string>
+    <string name="viewer_share">SHARE</string>
+    <string name="viewer_open_with">OPEN WITH</string>
+    <string name="viewer_delete">DELETE</string>
+    <string name="dialog_title_delete">DELETE CAPTURE</string>
+    <string name="dialog_body_delete">Remove this image from storage?\nThis cannot be undone.</string>
+    <string name="btn_delete">DELETE</string>
+    <string name="toast_deleted">CAPTURE DELETED</string>
+    <string name="toast_delete_failed">DELETE FAILED</string>
+    <string name="viewer_coords_format">LAT  %1$s\nLON  %2$s</string>
 
     <!-- Update checker -->
     <string name="toast_no_internet">No internet connection.</string>
@@ -103,6 +117,11 @@
     <string name="btn_abort">Abort</string>
     <string name="notif_download_title">Downloading GeoHUD Update</string>
     <string name="notif_download_desc">Version %1$s</string>
+    <string name="dialog_title_download">DOWNLOADING UPDATE</string>
+    <string name="download_version">VERSION %1$s</string>
+    <string name="download_progress">%1$d%%</string>
+    <string name="download_progress_zero">0%</string>
+    <string name="download_waiting">WAITING FOR SERVER...</string>
     <string name="toast_download_started">Download initiated...</string>
     <string name="toast_download_failed">Download failed.</string>
     <string name="toast_download_error">Download failed: %1$s</string>

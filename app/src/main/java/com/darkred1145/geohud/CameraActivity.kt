@@ -374,6 +374,8 @@ class CameraActivity : AppCompatActivity(), LocationListener {
         val capture = imageCapture ?: return
         val location = currentLocation?.let { Location(it) }
         val name = PhotoStore.newPhotoName(this)
+        val stampLocation = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
+            .getBoolean(Prefs.KEY_STAMP_LOCATION, false)
         val temp = try {
             PhotoStore.newTempFile(this)
         } catch (e: Exception) {
@@ -402,6 +404,13 @@ class CameraActivity : AppCompatActivity(), LocationListener {
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         var tagged = false
                         if (location != null) {
+                            if (stampLocation) {
+                                try {
+                                    PhotoStore.stamp(temp, location)
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Coordinate stamp failed", e)
+                                }
+                            }
                             try {
                                 PhotoStore.tag(temp, location)
                                 tagged = true

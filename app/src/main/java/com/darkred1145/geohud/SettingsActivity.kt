@@ -84,6 +84,12 @@ class SettingsActivity : AppCompatActivity() {
             applyPanelStyleTo(findViewById(R.id.root), slider.value.toInt(), checked)
         }
 
+        val switchStamp = findViewById<MaterialSwitch>(R.id.switchStamp)
+        switchStamp.isChecked = prefs.getBoolean(Prefs.KEY_STAMP_LOCATION, false)
+        switchStamp.setOnCheckedChangeListener { _, checked ->
+            prefs.edit { putBoolean(Prefs.KEY_STAMP_LOCATION, checked) }
+        }
+
         // Logic
         val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
             if (uri != null) {
