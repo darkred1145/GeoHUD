@@ -7,7 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+import coil3.load
+import coil3.request.crossfade
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -49,7 +50,6 @@ class GalleryAdapter(
         // Use Coil to load image efficiently
         holder.imgThumbnail.load(source) {
             crossfade(true)
-            placeholder(android.R.drawable.ic_menu_gallery)
         }
 
         holder.txtDate.text = if (item.dateMillis > 0L) {

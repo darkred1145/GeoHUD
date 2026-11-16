@@ -1,6 +1,5 @@
 import java.util.Properties
 import java.io.FileInputStream
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -9,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.darkred1145.geohud"
-    compileSdk = 36
+    compileSdk = 37
 
     // Read keystore properties for release signing
     val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -32,9 +31,9 @@ android {
     defaultConfig {
         applicationId = "com.darkred1145.geohud"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 9
-        versionName = "0.6.3"
+        targetSdk = 36
+        versionCode = 10
+        versionName = "0.6.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -65,11 +64,6 @@ android {
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-    }
-}
 
 dependencies {
     // Existing default dependencies
@@ -88,7 +82,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
     implementation("androidx.exifinterface:exifinterface:1.4.2")
-    implementation("io.coil-kt:coil:2.7.0")
+    implementation("io.coil-kt.coil3:coil:3.6.3")
 
     implementation("androidx.documentfile:documentfile:1.1.0")
     implementation("androidx.core:core-splashscreen:1.2.0")
@@ -98,3 +92,5 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
 }
+
+
