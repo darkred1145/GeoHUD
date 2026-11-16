@@ -1,7 +1,6 @@
 package com.darkred1145.geohud
 
 import android.Manifest
-import android.content.ActivityNotFoundException
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -202,17 +201,11 @@ class GalleryActivity : AppCompatActivity() {
             }
         }
 
-        val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, "image/*")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-        try {
-            startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.toast_no_viewer, Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, R.string.toast_no_viewer, Toast.LENGTH_SHORT).show()
-        }
+        startActivity(
+            Intent(this, ViewerActivity::class.java)
+                .setData(uri)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        )
     }
 
     override fun onDestroy() {

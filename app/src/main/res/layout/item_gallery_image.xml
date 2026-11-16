@@ -31,7 +31,6 @@
                 android:contentDescription="@string/cd_thumbnail"
                 android:scaleType="centerCrop"
                 android:src="@android:drawable/ic_menu_gallery"
-                app:tint="?attr/colorSecondary"
                 tools:ignore="UseAppTint" />
 
             <View
